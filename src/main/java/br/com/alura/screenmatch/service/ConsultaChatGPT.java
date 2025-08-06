@@ -8,7 +8,7 @@
 //
 //public class ConsultaChatGPT {
 //    public static String obterTraducao(String texto) {
-//        OpenAiService service = new OpenAiService("api-key");
+//        OpenAiService service = new OpenAiService(System.getenv("api_openai"));
 //
 //        ChatMessage mensagemUsuario = new ChatMessage("user", "Traduza para o português o texto: " + texto);
 //
