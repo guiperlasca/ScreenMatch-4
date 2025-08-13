@@ -2,6 +2,7 @@ package br.com.alura.screenmatch.model;
 
 //import br.com.alura.screenmatch.service.ConsultaChatGPT;
 import br.com.alura.screenmatch.service.ServicoDeTraducao;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.persistence.Id;
 
