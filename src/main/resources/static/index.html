@@ -1,94 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <title>Screenmatch</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/modal.css">
-    <title>Screenmatch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
 </head>
-
 <body>
-    <header class="cabecalho">
-        <div class="cabecalho__logo">
-            <img src="./img/logo.png" alt="Logo ScreenMatch">
-            <h1>Screen match</h1>
-            <select data-categorias>
-                <option value="todos">Categorias</option>
-                <option value="favoritos">Favoritos</option>
-                <option value="comédia">Comédia</option>
-                <option value="ação">Ação</option>
-                <option value="crime">Crime</option>
-                <option value="drama">Drama</option>
-                <option value="aventura">Aventura</option>
-            </select>
-        </div>
-
-        <div class="cabecalho__opcoes">
-            <div class="pesquisa-container">
-                <input type="search" id="campo-pesquisa" placeholder="Buscar por título...">
-                <span class="material-symbols-outlined">search</span>
+    <header id="main-header">
+        <div class="container">
+            <a href="/" class="logo">Screenmatch</a>
+            <div class="search-container">
+                <input type="search" id="search-input" placeholder="Buscar filmes e séries...">
+                <i class="material-icons">search</i>
             </div>
-            <button class="botao" data-botao-adicionar>Adicionar série</button>
-
-            <div id="user-actions">
-                <a href="/login.html" class="botao">Login</a>
-                <a href="/registro.html" class="botao botao-secundario">Registrar</a>
+            <nav id="main-nav">
+                <a href="/">Início</a>
+                <a href="/listas.html">Listas</a>
+            </nav>
+            <div id="user-area">
+                <a href="/login.html" class="btn btn-secondary">Login</a>
+                <a href="/registro.html" class="btn btn-primary">Registrar</a>
             </div>
         </div>
     </header>
 
-    <main>
-        <section data-name="lancamentos" class="section">
-            <h2>
-                Lançamentos no ScreenMatch
-            </h2>
-
-
-        </section>
-
-        <section data-name="top5" class="section">
-            <h2>
-                Titulos populares no ScreenMatch
-            </h2>
-
-        </section>
-
-        <section data-name="series" class="section">
-            <h2>
-                Titulos no ScreenMatch
-            </h2>
-        </section>
-
-        <section data-name="categoria" class="hidden pesquisa">
-            <h2>Titulos no ScreenMatch</h2>
-        </section>
-
-        <section data-name="favoritos" class="hidden pesquisa">
-            <h2>Meus Favoritos</h2>
-        </section>
-    </main>
-    <div class="modal-container" data-modal-container>
-        <div class="modal">
-            <h2>Adicionar série</h2>
-            <form data-formulario-adicionar>
-                <label for="titulo">Nome da série</label>
-                <input type="text" id="titulo" placeholder="Ex: The Office" required data-titulo>
-                <div class="modal__botoes">
-                    <button type="button" class="botao" data-botao-cancelar>Cancelar</button>
-                    <button type="submit" class="botao">Adicionar</button>
+    <main id="main-content">
+        <div class="container">
+            <section id="series-section">
+                <h2>Lançamentos</h2>
+                <div id="series-grid" class="series-grid">
+                    <!-- Cards das séries serão inseridos aqui -->
                 </div>
-            </form>
+            </section>
         </div>
-    </div>
-    <script src="./scripts/index.js" type="module"></script>
-</body>
+    </main>
 
+    <footer id="main-footer">
+        <div class="container">
+            <p>&copy; 2024 Screenmatch. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js" type="module"></script>
+</body>
 </html>
