@@ -1,5 +1,6 @@
 package br.com.alura.screenmatch.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -19,15 +20,21 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "serie_id")
+    @JsonBackReference
     private Serie serie;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     public Review() {
     }
 
-    public Review(String texto, Integer avaliacao, Serie serie) {
+    public Review(String texto, Integer avaliacao, Serie serie, Usuario usuario) {
         this.texto = texto;
         this.avaliacao = avaliacao;
         this.serie = serie;
+        this.usuario = usuario;
         this.data = LocalDate.now();
     }
 
@@ -71,5 +78,13 @@ public class Review {
 
     public void setSerie(Serie serie) {
         this.serie = serie;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

@@ -6,6 +6,7 @@ public record ReviewDTO(
         Long id,
         String texto,
         Integer avaliacao,
-        LocalDate data
+        LocalDate data,
+        String autor
 ) {
 }
