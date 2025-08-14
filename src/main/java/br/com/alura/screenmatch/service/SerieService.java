@@ -5,7 +5,9 @@ import br.com.alura.screenmatch.dto.EpisodioDTO;
 import br.com.alura.screenmatch.dto.SerieDTO;
 import br.com.alura.screenmatch.model.Categoria;
 import br.com.alura.screenmatch.model.Serie;
+import br.com.alura.screenmatch.model.Usuario;
 import br.com.alura.screenmatch.repository.SerieRepository;
+import br.com.alura.screenmatch.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,9 @@ import br.com.alura.screenmatch.model.DadosSerie;
 public class SerieService {
     @Autowired
     private SerieRepository repository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     private ConsumoApi consumo = new ConsumoApi();
     private ConverteDados conversor = new ConverteDados();
@@ -87,19 +92,21 @@ public class SerieService {
         return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), Optional.ofNullable(serie.getFavorito()).orElse(false));
     }
 
-    public SerieDTO favoritarSerie(Long id) {
-        Optional<Serie> serie = repository.findById(id);
-        if (serie.isPresent()) {
-            Serie s = serie.get();
-            boolean favoritoAtual = Optional.ofNullable(s.getFavorito()).orElse(false);
-            s.setFavorito(!favoritoAtual);
-            repository.save(s);
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), s.getFavorito());
+    public SerieDTO favoritarSerie(Long serieId, Usuario usuario) {
+        Serie serie = repository.findById(serieId)
+                .orElseThrow(() -> new RuntimeException("Série não encontrada"));
+
+        if (usuario.getFavoritas().contains(serie)) {
+            usuario.getFavoritas().remove(serie);
+        } else {
+            usuario.getFavoritas().add(serie);
         }
-        return null;
+        usuarioRepository.save(usuario);
+
+        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), usuario.getFavoritas().contains(serie));
     }
 
-    public List<SerieDTO> obterSeriesFavoritas() {
-        return converteDados(repository.findByFavoritoTrue());
+    public List<SerieDTO> buscarSeries(String titulo) {
+        return converteDados(repository.findByTituloContainingIgnoreCase(titulo));
     }
 }

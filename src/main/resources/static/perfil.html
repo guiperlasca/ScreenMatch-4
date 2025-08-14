@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenmatch - Perfil</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body>
+    <header class="cabecalho">
+        <a href="/" class="cabecalho__logo">
+            <img src="./img/logo.png" alt="Logo ScreenMatch">
+            <h1>Screen match</h1>
+        </a>
+        <div class="cabecalho__opcoes">
+            <button id="logout-button" class="botao botao-secundario">Logout</button>
+        </div>
+    </header>
+
+    <main class="conteudo-principal">
+        <div class="perfil-container">
+            <h2>Meu Perfil</h2>
+            <p>Bem-vindo ao seu perfil! Em breve, você poderá ver suas séries favoritas e reviews aqui.</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+            }
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+            });
+        });
+    </script>
+</body>
+</html>

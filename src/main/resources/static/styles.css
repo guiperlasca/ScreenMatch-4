@@ -42,3 +42,12 @@ body {
 .botao[data-botao-cancelar]:hover {
     background-color: #555;
 }
+
+.botao-secundario {
+    background-color: transparent;
+    border: 1px solid var(--azul);
+}
+
+.botao-secundario:hover {
+    background-color: var(--azul);
+}
