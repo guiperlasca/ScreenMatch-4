@@ -20,7 +20,7 @@ public class TokenService {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer("Screenmatch")
-                    .withSubject(usuario.getLogin())
+                    .withSubject(usuario.getUsername())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception){

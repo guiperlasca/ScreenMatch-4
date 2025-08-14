@@ -1,8 +1,10 @@
 package br.com.alura.screenmatch.controller;
 
 import br.com.alura.screenmatch.dto.ReviewDTO;
+import br.com.alura.screenmatch.model.Usuario;
 import br.com.alura.screenmatch.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +22,7 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ReviewDTO createReview(@PathVariable Long serieId, @RequestBody ReviewDTO reviewDTO) {
-        return reviewService.createReview(serieId, reviewDTO);
+    public ReviewDTO createReview(@PathVariable Long serieId, @RequestBody ReviewDTO reviewDTO, @AuthenticationPrincipal Usuario usuario) {
+        return reviewService.createReview(serieId, reviewDTO, usuario);
     }
 }

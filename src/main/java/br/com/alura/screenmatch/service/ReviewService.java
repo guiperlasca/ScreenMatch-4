@@ -2,6 +2,7 @@ package br.com.alura.screenmatch.service;
 
 import br.com.alura.screenmatch.dto.ReviewDTO;
 import br.com.alura.screenmatch.model.Review;
+import br.com.alura.screenmatch.model.Usuario;
 import br.com.alura.screenmatch.model.Serie;
 import br.com.alura.screenmatch.repository.ReviewRepository;
 import br.com.alura.screenmatch.repository.SerieRepository;
@@ -26,10 +27,10 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    public ReviewDTO createReview(Long serieId, ReviewDTO reviewDTO) {
+    public ReviewDTO createReview(Long serieId, ReviewDTO reviewDTO, Usuario usuario) {
         Serie serie = serieRepository.findById(serieId)
                 .orElseThrow(() -> new RuntimeException("Série não encontrada"));
-        Review review = new Review(reviewDTO.texto(), reviewDTO.avaliacao(), serie);
+        Review review = new Review(reviewDTO.texto(), reviewDTO.avaliacao(), serie, usuario);
         reviewRepository.save(review);
         return convertToDto(review);
     }
@@ -39,7 +40,8 @@ public class ReviewService {
                 review.getId(),
                 review.getTexto(),
                 review.getAvaliacao(),
-                review.getData()
+                review.getData(),
+                review.getUsuario().getUsername()
         );
     }
 }
