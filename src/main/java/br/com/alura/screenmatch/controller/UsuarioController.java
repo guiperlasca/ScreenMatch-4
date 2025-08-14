@@ -1,16 +1,10 @@
 package br.com.alura.screenmatch.controller;
 
-import br.com.alura.screenmatch.model.Usuario;
-import br.com.alura.screenmatch.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import br.com.alura.screenmatch.dto.ReviewDTO;
 import br.com.alura.screenmatch.dto.SerieDTO;
-import br.com.alura.screenmatch.model.Serie;
 import br.com.alura.screenmatch.model.Usuario;
 import br.com.alura.screenmatch.repository.UsuarioRepository;
-import br.com.alura.screenmatch.service.SerieService;
+import br.com.alura.screenmatch.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
