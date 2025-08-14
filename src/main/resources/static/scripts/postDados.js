@@ -1,10 +1,15 @@
+import { getAuthHeader } from './auth.js';
+
 async function postDados(url, dados) {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        };
+
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: headers,
             body: JSON.stringify(dados)
         });
 

@@ -66,4 +66,8 @@ public class Usuario implements UserDetails {
     public void setFavoritas(List<Serie> favoritas) {
         this.favoritas = favoritas;
     }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 }

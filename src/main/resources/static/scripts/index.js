@@ -1,18 +1,45 @@
 import getDados from "./getDados.js";
 import postDados from "./postDados.js";
 import patchDados from "./patchDados.js";
+import { isUserLoggedIn, logout } from './auth.js';
 
 const main = document.querySelector('main');
 
 main.addEventListener('click', async (evento) => {
     if (evento.target.classList.contains('favorito')) {
-        const id = evento.target.dataset.id;
+        if (!isUserLoggedIn()) {
+            alert('Você precisa estar logado para favoritar uma série.');
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const starElement = evento.target;
+        const serieId = parseInt(starElement.dataset.id, 10);
+
+        const isFavorited = userFavorites.has(serieId);
+
+        // Optimistic UI update
+        if (isFavorited) {
+            userFavorites.delete(serieId);
+            starElement.textContent = 'star_outline';
+        } else {
+            userFavorites.add(serieId);
+            starElement.textContent = 'star';
+        }
+
         try {
-            const serieAtualizada = await patchDados(`/series/${id}/favorito`);
-            evento.target.textContent = serieAtualizada.favorito ? 'star' : 'star_outline';
-            evento.target.dataset.favorito = serieAtualizada.favorito;
+            await patchDados(`/series/${serieId}/favorito`);
         } catch (error) {
             console.error('Erro ao favoritar série:', error);
+            // Revert UI on error
+            if (isFavorited) {
+                userFavorites.add(serieId);
+                starElement.textContent = 'star';
+            } else {
+                userFavorites.delete(serieId);
+                starElement.textContent = 'star_outline';
+            }
+            alert('Não foi possível atualizar o status de favorito. Tente novamente.');
         }
     }
 });
@@ -74,16 +101,20 @@ function criarListaFilmes(elemento, dados) {
 
     const ul = document.createElement('ul');
     ul.className = 'lista';
-    const listaHTML = dados.map((filme) => `
-        <li class="lista__item">
-            <a href="/detalhes.html?id=${filme.id}">
-                <img src="${filme.poster}" alt="${filme.titulo}">
-            </a>
-            <span class="material-symbols-outlined favorito" data-id="${filme.id}" data-favorito="${filme.favorito}">
-                ${filme.favorito ? 'star' : 'star_outline'}
-            </span>
-        </li>
-    `).join('');
+    const listaHTML = dados.map((filme) => {
+        const isFavorite = userFavorites.has(filme.id);
+        const starIcon = isFavorite ? 'star' : 'star_outline';
+        return `
+            <li class="lista__item">
+                <a href="/detalhes.html?id=${filme.id}">
+                    <img src="${filme.poster}" alt="${filme.titulo}">
+                </a>
+                <span class="material-symbols-outlined favorito" data-id="${filme.id}">
+                    ${starIcon}
+                </span>
+            </li>
+        `;
+    }).join('');
 
     ul.innerHTML = listaHTML;
     elemento.appendChild(ul);
@@ -183,8 +214,29 @@ function mostrarSessoesPadrao() {
 }
 
 
+let userFavorites = new Set();
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (isUserLoggedIn()) {
+        const userActions = document.getElementById('user-actions');
+        userActions.innerHTML = `
+            <a href="/perfil.html" class="botao">Perfil</a>
+            <button id="logout-button" class="botao botao-secundario">Logout</button>
+        `;
+        document.getElementById('logout-button').addEventListener('click', logout);
+
+        getDados('/usuarios/meus-favoritos')
+            .then(data => {
+                userFavorites = new Set(data.map(serie => serie.id));
+                geraSeries(); // Gera as séries depois de saber quais são as favoritas
+            });
+    } else {
+        geraSeries(); // Gera as séries para o usuário não logado
+    }
+});
+
+
 // Array de URLs para as solicitações
-geraSeries();
 function geraSeries() {
     const urls = ['/series/top5', '/series/lancamentos', '/series'];
 

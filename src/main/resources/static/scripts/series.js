@@ -1,4 +1,5 @@
 import getDados from "./getDados.js";
+import { getAuthHeader } from './auth.js';
 
 const params = new URLSearchParams(window.location.search);
 const serieId = params.get('id');
@@ -166,6 +167,7 @@ function carregarReviews() {
 
                 reviewElement.innerHTML = `
                     <div class="review__header">
+                        <strong class="review__author">${review.autor}</strong>
                         <div class="review__rating">
                            ${ratingStars}
                         </div>
@@ -198,7 +200,8 @@ reviewForm.addEventListener('submit', (evento) => {
     fetch(`/series/${serieId}/reviews`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
         },
         body: JSON.stringify(reviewData)
     })
