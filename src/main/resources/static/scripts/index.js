@@ -141,6 +141,48 @@ categoriaSelect.addEventListener('change', function () {
     }
 });
 
+// --- Lógica de Pesquisa ---
+const campoPesquisa = document.getElementById('campo-pesquisa');
+let debounceTimeout;
+
+campoPesquisa.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+        const query = campoPesquisa.value;
+        if (query && query.length > 2) {
+            buscarEExibirSeries(query);
+        } else if (!query) {
+            // Se o campo de busca estiver vazio, volta a exibir as listas padrão
+            mostrarSessoesPadrao();
+            geraSeries();
+        }
+    }, 500); // 500ms de delay
+});
+
+function buscarEExibirSeries(query) {
+    const categoria = document.querySelector('[data-name="categoria"]');
+    for (const section of sectionsParaOcultar) {
+        section.classList.add('hidden');
+    }
+    categoria.classList.remove('hidden');
+    getDados(`/series/buscar?titulo=${query}`)
+        .then(data => {
+            criarListaFilmes(categoria, data);
+        })
+        .catch(error => {
+            lidarComErro("Ocorreu um erro ao buscar as séries.");
+        });
+}
+
+function mostrarSessoesPadrao() {
+    const categoria = document.querySelector('[data-name="categoria"]');
+    for (const section of sectionsParaOcultar) {
+        section.classList.remove('hidden');
+    }
+    categoria.classList.add('hidden');
+}
+
+
 // Array de URLs para as solicitações
 geraSeries();
 function geraSeries() {

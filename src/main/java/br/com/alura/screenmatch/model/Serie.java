@@ -36,8 +36,6 @@ public class Serie {
 
     private String sinopse;
 
-    private Boolean favorito;
-
     @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Episodio> episodios = new ArrayList<>();
 
@@ -130,14 +128,6 @@ public class Serie {
 
     public void setSinopse(String sinopse) {
         this.sinopse = sinopse;
-    }
-
-    public Boolean getFavorito() {
-        return favorito;
-    }
-
-    public void setFavorito(Boolean favorito) {
-        this.favorito = favorito;
     }
 
     public List<Review> getReviews() {

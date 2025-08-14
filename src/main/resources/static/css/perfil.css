@@ -1,0 +1,42 @@
+body {
+    background: linear-gradient(180deg, #101010 0%, #041a35 50%, #101010 100%);
+    background-attachment: fixed;
+}
+
+.cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5em 4em;
+    border-bottom: 1px solid var(--cinza);
+}
+
+.cabecalho__logo {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    text-decoration: none;
+    color: var(--branco);
+}
+
+.cabecalho__logo img {
+    width: 120px;
+    height: auto;
+}
+
+.conteudo-principal {
+    max-width: 1200px;
+    margin: 4em auto;
+    padding: 0 2em;
+}
+
+.perfil-container {
+    background-color: var(--cinza-claro);
+    padding: 2em;
+    border-radius: 8px;
+}
+
+.perfil-container h2 {
+    font-size: 2rem;
+    margin-bottom: 1em;
+}
