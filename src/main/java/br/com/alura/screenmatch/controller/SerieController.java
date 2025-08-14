@@ -6,6 +6,9 @@ import br.com.alura.screenmatch.service.SerieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,5 +54,20 @@ public class SerieController {
     @GetMapping("/categoria/{nomeGenero}")
     public List<SerieDTO> obterSeriesPorCategoria(@PathVariable String nomeGenero){
         return servico.obterSeriesPorCategoria(nomeGenero);
+    }
+
+    @PostMapping
+    public SerieDTO cadastrarSerie(@RequestBody SerieDTO serieDTO){
+        return servico.cadastrarSerie(serieDTO);
+    }
+
+    @PatchMapping("/{id}/favorito")
+    public SerieDTO favoritarSerie(@PathVariable Long id){
+        return servico.favoritarSerie(id);
+    }
+
+    @GetMapping("/favoritos")
+    public List<SerieDTO> obterSeriesFavoritas(){
+        return servico.obterSeriesFavoritas();
     }
 }

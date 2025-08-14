@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/modal.css">
     <title>Screenmatch</title>
 </head>
 
@@ -21,6 +22,7 @@
             <h1>Screen match</h1>
             <select data-categorias>
                 <option value="todos">Categorias</option>
+                <option value="favoritos">Favoritos</option>
                 <option value="comédia">Comédia</option>
                 <option value="ação">Ação</option>
                 <option value="crime">Crime</option>
@@ -30,6 +32,7 @@
         </div>
 
         <div class="cabecalho__opcoes">
+            <button class="botao" data-botao-adicionar>Adicionar série</button>
             <span class="material-symbols-outlined">
                 search
             </span>
@@ -69,7 +72,24 @@
         <section data-name="categoria" class="hidden pesquisa">
             <h2>Titulos no ScreenMatch</h2>
         </section>
+
+        <section data-name="favoritos" class="hidden pesquisa">
+            <h2>Meus Favoritos</h2>
+        </section>
     </main>
+    <div class="modal-container" data-modal-container>
+        <div class="modal">
+            <h2>Adicionar série</h2>
+            <form data-formulario-adicionar>
+                <label for="titulo">Nome da série</label>
+                <input type="text" id="titulo" placeholder="Ex: The Office" required data-titulo>
+                <div class="modal__botoes">
+                    <button type="button" class="botao" data-botao-cancelar>Cancelar</button>
+                    <button type="submit" class="botao">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="./scripts/index.js" type="module"></script>
 </body>
 

@@ -1,10 +1,63 @@
 import getDados from "./getDados.js";
+import postDados from "./postDados.js";
+import patchDados from "./patchDados.js";
+
+const main = document.querySelector('main');
+
+main.addEventListener('click', async (evento) => {
+    if (evento.target.classList.contains('favorito')) {
+        const id = evento.target.dataset.id;
+        try {
+            const serieAtualizada = await patchDados(`/series/${id}/favorito`);
+            evento.target.textContent = serieAtualizada.favorito ? 'star' : 'star_outline';
+            evento.target.dataset.favorito = serieAtualizada.favorito;
+        } catch (error) {
+            console.error('Erro ao favoritar série:', error);
+        }
+    }
+});
+
+const modalContainer = document.querySelector('[data-modal-container]');
+const botaoAdicionar = document.querySelector('[data-botao-adicionar]');
+const botaoCancelar = document.querySelector('[data-botao-cancelar]');
+const formularioAdicionar = document.querySelector('[data-formulario-adicionar]');
+
+botaoAdicionar.addEventListener('click', () => {
+    modalContainer.classList.add('mostrar');
+});
+
+botaoCancelar.addEventListener('click', () => {
+    modalContainer.classList.remove('mostrar');
+});
+
+modalContainer.addEventListener('click', (evento) => {
+    if (evento.target === modalContainer) {
+        modalContainer.classList.remove('mostrar');
+    }
+});
+
+formularioAdicionar.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const titulo = document.querySelector('[data-titulo]').value;
+    try {
+        await postDados('/series', { titulo });
+        modalContainer.classList.remove('mostrar');
+        // Limpa o formulário
+        formularioAdicionar.reset();
+        // Atualiza a lista de séries
+        geraSeries();
+    } catch (error) {
+        console.error('Erro ao adicionar série:', error);
+    }
+});
+
 
 // Mapeia os elementos DOM que você deseja atualizar
 const elementos = {
     top5: document.querySelector('[data-name="top5"]'),
     lancamentos: document.querySelector('[data-name="lancamentos"]'),
-    series: document.querySelector('[data-name="series"]')
+    series: document.querySelector('[data-name="series"]'),
+    favoritos: document.querySelector('[data-name="favoritos"]')
 };
 
 // Função para criar a lista de filmes
@@ -22,10 +75,13 @@ function criarListaFilmes(elemento, dados) {
     const ul = document.createElement('ul');
     ul.className = 'lista';
     const listaHTML = dados.map((filme) => `
-        <li>
+        <li class="lista__item">
             <a href="/detalhes.html?id=${filme.id}">
                 <img src="${filme.poster}" alt="${filme.titulo}">
             </a>
+            <span class="material-symbols-outlined favorito" data-id="${filme.id}" data-favorito="${filme.favorito}">
+                ${filme.favorito ? 'star' : 'star_outline'}
+            </span>
         </li>
     `).join('');
 
@@ -60,13 +116,28 @@ categoriaSelect.addEventListener('change', function () {
 
         categoria.classList.remove('hidden')
         // Faça uma solicitação para o endpoint com a categoria selecionada
-        getDados(`/series/categoria/${categoriaSelecionada}`)
-            .then(data => {
-                criarListaFilmes(categoria, data);
-            })
-            .catch(error => {
-                lidarComErro("Ocorreu um erro ao carregar os dados da categoria.");
-            });
+        if (categoriaSelecionada === 'favoritos') {
+            const favoritos = document.querySelector('[data-name="favoritos"]');
+            for (const section of sectionsParaOcultar) {
+                section.classList.add('hidden')
+            }
+            favoritos.classList.remove('hidden');
+            getDados(`/series/favoritos`)
+                .then(data => {
+                    criarListaFilmes(favoritos, data);
+                })
+                .catch(error => {
+                    lidarComErro("Ocorreu um erro ao carregar os dados da categoria.");
+                });
+        } else {
+            getDados(`/series/categoria/${categoriaSelecionada}`)
+                .then(data => {
+                    criarListaFilmes(categoria, data);
+                })
+                .catch(error => {
+                    lidarComErro("Ocorreu um erro ao carregar os dados da categoria.");
+                });
+        }
     }
 });
 
