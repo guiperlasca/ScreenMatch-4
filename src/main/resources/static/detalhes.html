@@ -1,69 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
+    <title>Detalhes da Série - Screenmatch</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="css/detalhes.css">
-    <title>Screenmatch - Detalhes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/detalhes.css">
 </head>
-
 <body>
-    <header class="cabecalho">
-        <a href="/" class="cabecalho__logo">
-            <img src="./img/logo.png" alt="Logo ScreenMatch">
-            <h1>Screen match</h1>
-        </a>
-        <div class="cabecalho__opcoes">
-            <button class="botao" onclick="window.location.href='/';">Voltar</button>
-        </div>
+    <header id="main-header">
+        <!-- O cabeçalho pode ser carregado dinamicamente se necessário, ou duplicado -->
     </header>
 
-    <main class="conteudo-principal">
-        <div class="detalhes-container" id="detalhes-container">
-            <!-- As informações da série serão inseridas aqui pelo JS -->
-        </div>
-
-        <div class="temporadas-container">
-            <h3>Temporadas</h3>
-            <select id="temporadas-select" class="dropdown-select">
-                <!-- As opções de temporadas serão adicionadas aqui -->
-            </select>
-            <div class="episodios" id="temporadas-episodios">
-                <!-- A lista de episódios será inserida aqui -->
-            </div>
-        </div>
-
-        <div class="reviews-container">
-            <h3>Reviews</h3>
-            <div class="review-form-container">
-                <h4>Deixe sua review</h4>
-                <form id="review-form">
-                    <div class="star-rating">
-                        <span class="material-symbols-outlined" data-value="1">star</span>
-                        <span class="material-symbols-outlined" data-value="2">star</span>
-                        <span class="material-symbols-outlined" data-value="3">star</span>
-                        <span class="material-symbols-outlined" data-value="4">star</span>
-                        <span class="material-symbols-outlined" data-value="5">star</span>
-                    </div>
-                    <input type="hidden" name="avaliacao" id="avaliacao-input" value="0">
-                    <textarea name="texto" id="texto-review" placeholder="Escreva sua review aqui..." required></textarea>
-                    <button type="submit" class="botao">Enviar Review</button>
-                </form>
-            </div>
-            <div class="reviews-list" id="reviews-list">
-                <!-- As reviews existentes serão inseridas aqui -->
-            </div>
+    <main id="main-content">
+        <div id="details-content" class="container">
+            <!-- Conteúdo da página de detalhes será injetado aqui -->
         </div>
     </main>
 
-    <script src="./scripts/series.js" type="module"></script>
-</body>
+    <footer id="main-footer">
+        <div class="container">
+            <p>&copy; 2024 Screenmatch. Todos os direitos reservados.</p>
+        </div>
+    </footer>
 
+    <script src="/js/detalhes.js" type="module"></script>
+</body>
 </html>
