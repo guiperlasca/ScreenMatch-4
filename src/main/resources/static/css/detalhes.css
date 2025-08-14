@@ -1,65 +1,211 @@
 body {
-    background-size: cover;
-    background-image: linear-gradient(180.61deg,
-            #000000e3 25.16%,
-            #04254fc4 80%,
-            #409ecdcb 100%);
-    padding: 5em;
-    height: 100%;
-    min-height: 100vh;
-    /* Defina a altura como 100vh para ocupar toda a tela */
+    background: linear-gradient(180deg, #101010 0%, #041a35 50%, #101010 100%);
+    background-attachment: fixed;
 }
 
-
-.ficha img {
-    margin: 0 3em 2em 0;
-}
-
-.ficha-descricao {
+.cabecalho {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5em 4em;
+    border-bottom: 1px solid var(--cinza);
 }
 
-.ficha-descricao div {
+.cabecalho__logo {
     display: flex;
-    flex-direction: column;
-    gap: 3em;
-}
-
-.episodios-lista {
-    height: 25vh;
-    display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 1em;
-    flex-wrap: wrap;
+    text-decoration: none;
+    color: var(--branco);
+}
+
+.cabecalho__logo img {
+    width: 120px;
+    height: auto;
+}
+
+.conteudo-principal {
+    max-width: 1200px;
+    margin: 4em auto;
+    padding: 0 2em;
+}
+
+.detalhes-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.5em;
+    margin-bottom: 4em;
+}
+
+.detalhes__poster img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.detalhes__info h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.25em;
+}
+
+.detalhes__metadata {
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
+    margin-bottom: 1.5em;
+    color: #aaa;
+}
+
+.detalhes__avaliacao {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.detalhes__avaliacao .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: var(--amarelo);
+    font-variation-settings: 'FILL' 1;
+}
+
+.detalhes__sinopse {
+    line-height: 1.6;
+    margin-bottom: 2em;
+}
+
+.detalhes__elenco h4,
+.temporadas-container h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1em;
+    border-left: 3px solid var(--azul);
+    padding-left: 0.5em;
+}
+
+.detalhes__elenco p {
+    color: #ccc;
+    line-height: 1.7;
+}
+
+.dropdown-select {
+    font-size: 1.1rem;
+    padding: 0.75em 1.5em;
+    border-radius: 4px;
+    border: 1px solid var(--cinza);
+    background-color: var(--cinza-claro);
+    color: var(--branco);
+    margin-bottom: 1.5em;
+}
+
+.episodios ul {
     list-style-type: none;
+    padding: 0;
 }
 
-h2 {
-    font-size: 48px;
+.episodios li {
+    background-color: var(--cinza-claro);
+    padding: 1em 1.5em;
+    border-radius: 4px;
+    margin-bottom: 0.75em;
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s, border-left-color 0.2s;
 }
 
-p {
-    font-size: 22px;
+.episodios li:hover {
+    background-color: var(--cinza);
+    border-left-color: var(--amarelo);
 }
 
-select,
-option {
-    font-size: 24px;
-    padding: 0 1em;
+.reviews-container {
+    margin-top: 4em;
+}
+
+.review-form-container {
+    background-color: var(--cinza-claro);
+    padding: 2em;
+    border-radius: 8px;
+    margin-bottom: 3em;
+}
+
+.review-form-container h4 {
+    font-size: 1.5rem;
     margin-bottom: 1em;
 }
 
-select {
-    border-radius: 24px;
-    border: none;
-    outline: none;
-    width: 10%;
+#review-form textarea {
+    width: 100%;
+    height: 120px;
+    padding: 1em;
+    border-radius: 4px;
+    border: 1px solid var(--cinza);
+    background-color: #1c1c1c;
+    color: var(--branco);
+    resize: vertical;
+    margin-bottom: 1em;
 }
 
-@media screen and (max-width: 900px) {
+.star-rating {
+    margin-bottom: 1em;
+}
 
-    .ficha-descricao,
-    .episodios-lista {
+.star-rating .material-symbols-outlined {
+    font-size: 2.5rem;
+    color: var(--cinza);
+    cursor: pointer;
+    transition: color 0.2s;
+    font-variation-settings: 'FILL' 0;
+}
+
+.star-rating .material-symbols-outlined.active,
+.star-rating .material-symbols-outlined:hover {
+    color: var(--amarelo);
+    font-variation-settings: 'FILL' 1;
+}
+
+
+.reviews-list .review {
+    background-color: var(--cinza-claro);
+    padding: 1.5em;
+    border-radius: 8px;
+    margin-bottom: 1.5em;
+    border-left: 3px solid var(--azul);
+}
+
+.review__header {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+
+.review__rating .material-symbols-outlined {
+    color: var(--amarelo);
+}
+
+.review__rating .material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+}
+
+.review__date {
+    margin-left: auto;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+@media screen and (max-width: 768px) {
+    .detalhes-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .detalhes__poster img {
+        max-width: 250px;
+        margin: 0 auto 2em;
         display: block;
+    }
+
+    .detalhes__metadata {
+        justify-content: center;
     }
 }

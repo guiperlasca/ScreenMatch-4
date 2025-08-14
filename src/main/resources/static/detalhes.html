@@ -5,38 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="css/detalhes.css">
-
-    <title>Screenmatch</title>
+    <title>Screenmatch - Detalhes</title>
 </head>
 
 <body>
-    <main class="ficha">
-        <div class="ficha-descricao" id="ficha-descricao">
-            <!-- As informações serão inseridas aqui -->
+    <header class="cabecalho">
+        <a href="/" class="cabecalho__logo">
+            <img src="./img/logo.png" alt="Logo ScreenMatch">
+            <h1>Screen match</h1>
+        </a>
+        <div class="cabecalho__opcoes">
+            <button class="botao" onclick="window.location.href='/';">Voltar</button>
+        </div>
+    </header>
 
-
-
+    <main class="conteudo-principal">
+        <div class="detalhes-container" id="detalhes-container">
+            <!-- As informações da série serão inseridas aqui pelo JS -->
         </div>
 
-        <div class="ficha-temporada">
-            <h3>Escolher temporada:</h3>
-            <br>
+        <div class="temporadas-container">
+            <h3>Temporadas</h3>
             <select id="temporadas-select" class="dropdown-select">
-                <!-- As opções serão adicionadas aqui -->
+                <!-- As opções de temporadas serão adicionadas aqui -->
             </select>
-        </div>
-        <br>
-        <div class="episodios" id="temporadas-episodios">
-            <!-- As informações serão inseridas aqui -->
+            <div class="episodios" id="temporadas-episodios">
+                <!-- A lista de episódios será inserida aqui -->
+            </div>
         </div>
 
-
+        <div class="reviews-container">
+            <h3>Reviews</h3>
+            <div class="review-form-container">
+                <h4>Deixe sua review</h4>
+                <form id="review-form">
+                    <div class="star-rating">
+                        <span class="material-symbols-outlined" data-value="1">star</span>
+                        <span class="material-symbols-outlined" data-value="2">star</span>
+                        <span class="material-symbols-outlined" data-value="3">star</span>
+                        <span class="material-symbols-outlined" data-value="4">star</span>
+                        <span class="material-symbols-outlined" data-value="5">star</span>
+                    </div>
+                    <input type="hidden" name="avaliacao" id="avaliacao-input" value="0">
+                    <textarea name="texto" id="texto-review" placeholder="Escreva sua review aqui..." required></textarea>
+                    <button type="submit" class="botao">Enviar Review</button>
+                </form>
+            </div>
+            <div class="reviews-list" id="reviews-list">
+                <!-- As reviews existentes serão inseridas aqui -->
+            </div>
+        </div>
     </main>
 
     <script src="./scripts/series.js" type="module"></script>
