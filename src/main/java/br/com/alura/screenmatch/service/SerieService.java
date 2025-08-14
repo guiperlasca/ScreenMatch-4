@@ -36,19 +36,19 @@ public class SerieService {
 
     private List<SerieDTO> converteDados(List<Serie> series) {
         return series.stream()
-                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), s.isFavorito()))
+                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), Optional.ofNullable(s.getFavorito()).orElse(false)))
                 .collect(Collectors.toList());
     }
 
     public List<SerieDTO> obterLancamentos() {
-        return converteDados(repository.lancamentosMaisRecentes());
+        return converteDados(repository.findTop5ByEpisodioDataLancamento());
     }
 
     public SerieDTO obterPorId(Long id) {
         Optional<Serie> serie = repository.findById(id);
         if (serie.isPresent()) {
             Serie s = serie.get();
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), s.isFavorito());
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), Optional.ofNullable(s.getFavorito()).orElse(false));
         }
         return null;
     }
@@ -84,16 +84,17 @@ public class SerieService {
         DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
         Serie serie = new Serie(dados);
         repository.save(serie);
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), serie.isFavorito());
+        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), Optional.ofNullable(serie.getFavorito()).orElse(false));
     }
 
     public SerieDTO favoritarSerie(Long id) {
         Optional<Serie> serie = repository.findById(id);
         if (serie.isPresent()) {
             Serie s = serie.get();
-            s.setFavorito(!s.isFavorito());
+            boolean favoritoAtual = Optional.ofNullable(s.getFavorito()).orElse(false);
+            s.setFavorito(!favoritoAtual);
             repository.save(s);
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), s.isFavorito());
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), s.getFavorito());
         }
         return null;
     }

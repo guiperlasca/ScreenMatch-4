@@ -10,6 +10,6 @@ public record SerieDTO(Long id,
                        String atores,
                        String poster,
                        String sinopse,
-                       boolean favorito) {
+                       Boolean favorito) {
 
 }
