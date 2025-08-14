@@ -153,7 +153,7 @@ categoriaSelect.addEventListener('change', function () {
                 section.classList.add('hidden')
             }
             favoritos.classList.remove('hidden');
-            getDados(`/series/favoritos`)
+            getDados(`/usuarios/meus-favoritos`)
                 .then(data => {
                     criarListaFilmes(favoritos, data);
                 })
