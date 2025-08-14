@@ -41,7 +41,7 @@ public class SerieService {
 
     private List<SerieDTO> converteDados(List<Serie> series) {
         return series.stream()
-                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), Optional.ofNullable(s.getFavorito()).orElse(false)))
+                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse()))
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +53,7 @@ public class SerieService {
         Optional<Serie> serie = repository.findById(id);
         if (serie.isPresent()) {
             Serie s = serie.get();
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), Optional.ofNullable(s.getFavorito()).orElse(false));
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse());
         }
         return null;
     }
@@ -89,7 +89,7 @@ public class SerieService {
         DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
         Serie serie = new Serie(dados);
         repository.save(serie);
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), Optional.ofNullable(serie.getFavorito()).orElse(false));
+        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse());
     }
 
     public SerieDTO favoritarSerie(Long serieId, Usuario usuario) {
@@ -103,7 +103,7 @@ public class SerieService {
         }
         usuarioRepository.save(usuario);
 
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), usuario.getFavoritas().contains(serie));
+        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse());
     }
 
     public List<SerieDTO> buscarSeries(String titulo) {

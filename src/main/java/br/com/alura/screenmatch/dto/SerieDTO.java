@@ -9,7 +9,6 @@ public record SerieDTO(Long id,
                        Categoria genero,
                        String atores,
                        String poster,
-                       String sinopse,
-                       Boolean favorito) {
+                       String sinopse) {
 
 }

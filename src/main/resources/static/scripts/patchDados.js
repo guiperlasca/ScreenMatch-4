@@ -1,10 +1,15 @@
+import { getAuthHeader } from './auth.js';
+
 async function patchDados(url) {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        };
+
         const response = await fetch(url, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: headers
         });
 
         if (!response.ok) {
