@@ -44,4 +44,10 @@ public class ReviewService {
                 review.getUsuario().getUsername()
         );
     }
+
+    public List<ReviewDTO> getReviewsByUsuario(Usuario usuario) {
+        return reviewRepository.findByUsuario(usuario).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 }

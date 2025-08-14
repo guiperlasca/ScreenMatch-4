@@ -40,3 +40,55 @@ body {
     font-size: 2rem;
     margin-bottom: 1em;
 }
+
+.perfil-container section {
+    margin-top: 3em;
+}
+
+.perfil-container h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1em;
+    border-left: 3px solid var(--azul);
+    padding-left: 0.5em;
+}
+
+#favoritos-lista {
+    list-style-type: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1em;
+}
+
+#favoritos-lista .lista__item img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+#reviews-lista .review {
+    background-color: var(--cinza);
+    padding: 1.5em;
+    border-radius: 8px;
+    margin-bottom: 1.5em;
+}
+
+.review__header {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+
+.review__rating .material-symbols-outlined {
+    color: var(--amarelo);
+}
+
+.review__rating .material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+}
+
+.review__date {
+    margin-left: auto;
+    color: #aaa;
+    font-size: 0.9rem;
+}

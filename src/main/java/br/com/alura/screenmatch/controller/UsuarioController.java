@@ -29,6 +29,9 @@ public class UsuarioController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ReviewService reviewService;
+
     @PostMapping
     public void cadastrar(@RequestBody Usuario usuario) {
         usuario.setSenha(passwordEncoder.encode(usuario.getPassword()));
@@ -40,5 +43,10 @@ public class UsuarioController {
         return usuario.getFavoritas().stream()
                 .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse()))
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/meus-reviews")
+    public List<ReviewDTO> getReviews(@AuthenticationPrincipal Usuario usuario) {
+        return reviewService.getReviewsByUsuario(usuario);
     }
 }
