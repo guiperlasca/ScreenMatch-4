@@ -71,4 +71,12 @@ public class Usuario implements UserDetails {
     public void setSenha(String senha) {
         this.senha = senha;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
 }
