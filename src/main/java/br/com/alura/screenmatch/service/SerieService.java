@@ -1,9 +1,10 @@
 package br.com.alura.screenmatch.service;
 
-
+import br.com.alura.screenmatch.dto.DadosCadastroSerieDTO;
 import br.com.alura.screenmatch.dto.EpisodioDTO;
 import br.com.alura.screenmatch.dto.SerieDTO;
 import br.com.alura.screenmatch.model.Categoria;
+import br.com.alura.screenmatch.model.DadosSerie;
 import br.com.alura.screenmatch.model.Serie;
 import br.com.alura.screenmatch.model.Usuario;
 import br.com.alura.screenmatch.repository.SerieRepository;
@@ -15,8 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import br.com.alura.screenmatch.model.DadosSerie;
-
 @Service
 public class SerieService {
     @Autowired
@@ -25,11 +24,11 @@ public class SerieService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    private ConsumoApi consumo = new ConsumoApi();
-    private ConverteDados conversor = new ConverteDados();
-    private final String ENDERECO = "https://www.omdbapi.com/?t=";
-    private final String API_KEY = "&apikey=6585022c";
+    @Autowired
+    private ConsumoApi consumoApi;
 
+    @Autowired
+    private ConverteDados conversor;
 
     public List<SerieDTO> obterTodasAsSeries() {
         return converteDados(repository.findAll());
@@ -37,12 +36,6 @@ public class SerieService {
 
     public List<SerieDTO> obterTop5Series() {
         return converteDados(repository.findTop5ByOrderByAvaliacaoDesc());
-    }
-
-    private List<SerieDTO> converteDados(List<Serie> series) {
-        return series.stream()
-                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse()))
-                .collect(Collectors.toList());
     }
 
     public List<SerieDTO> obterLancamentos() {
@@ -55,19 +48,18 @@ public class SerieService {
             Serie s = serie.get();
             return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse());
         }
-        return null;
+        return null; // Idealmente, lançar uma exceção Not Found
     }
 
     public List<EpisodioDTO> obterTodasTemporadas(Long id) {
         Optional<Serie> serie = repository.findById(id);
-
         if (serie.isPresent()) {
             Serie s = serie.get();
             return s.getEpisodios().stream()
                     .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
                     .collect(Collectors.toList());
         }
-        return null;
+        return null; // Idealmente, lançar uma exceção
     }
 
     public List<EpisodioDTO> obterTemporadasPorNumero(Long id, Long numero) {
@@ -75,38 +67,64 @@ public class SerieService {
                 .stream()
                 .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
                 .collect(Collectors.toList());
-
     }
 
     public List<SerieDTO> obterSeriesPorCategoria(String nomeGenero) {
-        Categoria categoria = Categoria.fromPortugues(nomeGenero);
-        return converteDados(repository.findByGenero(categoria));
+        try {
+            Categoria categoria = Categoria.fromPortugues(nomeGenero.trim());
+            return converteDados(repository.findByGenero(categoria));
+        } catch (IllegalArgumentException e) {
+            // Retorna lista vazia se a categoria não for válida
+            return List.of();
+        }
     }
 
-    public SerieDTO cadastrarSerie(SerieDTO serieDTO) {
-        var nomeSerie = serieDTO.titulo();
-        var json = consumo.obterDados(ENDERECO + nomeSerie.replace(" ", "+") + API_KEY);
-        DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
-        Serie serie = new Serie(dados);
-        repository.save(serie);
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse());
+    public SerieDTO cadastrarSerie(DadosCadastroSerieDTO dados) {
+        // 1. Verifica se a série já existe no banco de dados
+        List<Serie> seriesExistentes = repository.findByTituloContainingIgnoreCase(dados.titulo());
+        if (!seriesExistentes.isEmpty()) {
+            // Se já existe, retorna os dados do primeiro encontrado
+            return new SerieDTO(seriesExistentes.get(0));
+        }
+
+        // 2. Se não existir, busca na API do OMDB
+        String json = consumoApi.obterDados(dados.titulo());
+        DadosSerie dadosSerieApi = conversor.obterDados(json, DadosSerie.class);
+
+        // 3. Converte e salva a nova série
+        Serie novaSerie = new Serie(dadosSerieApi);
+        repository.save(novaSerie);
+
+        // 4. Retorna o DTO da nova série
+        return new SerieDTO(novaSerie);
     }
+
 
     public SerieDTO favoritarSerie(Long serieId, Usuario usuario) {
         Serie serie = repository.findById(serieId)
-                .orElseThrow(() -> new RuntimeException("Série não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Série não encontrada com id: " + serieId));
 
-        if (usuario.getFavoritas().contains(serie)) {
-            usuario.getFavoritas().remove(serie);
+        // A entidade Usuario deve ser gerenciada pelo contexto de persistência
+        Usuario usuarioGerenciado = usuarioRepository.findById(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (usuarioGerenciado.getFavoritas().contains(serie)) {
+            usuarioGerenciado.getFavoritas().remove(serie);
         } else {
-            usuario.getFavoritas().add(serie);
+            usuarioGerenciado.getFavoritas().add(serie);
         }
-        usuarioRepository.save(usuario);
+        usuarioRepository.save(usuarioGerenciado);
 
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse());
+        return new SerieDTO(serie);
     }
 
     public List<SerieDTO> buscarSeries(String titulo) {
         return converteDados(repository.findByTituloContainingIgnoreCase(titulo));
+    }
+
+    private List<SerieDTO> converteDados(List<Serie> series) {
+        return series.stream()
+                .map(SerieDTO::new) // Usando construtor de SerieDTO(Serie)
+                .collect(Collectors.toList());
     }
 }

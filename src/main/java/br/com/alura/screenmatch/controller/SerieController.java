@@ -60,8 +60,8 @@ public class SerieController {
     }
 
     @PostMapping
-    public SerieDTO cadastrarSerie(@RequestBody SerieDTO serieDTO){
-        return servico.cadastrarSerie(serieDTO);
+    public SerieDTO cadastrarSerie(@RequestBody br.com.alura.screenmatch.dto.DadosCadastroSerieDTO dados) {
+        return servico.cadastrarSerie(dados);
     }
 
     @PatchMapping("/{id}/favorito")

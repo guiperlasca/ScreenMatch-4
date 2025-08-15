@@ -27,9 +27,11 @@ public class UsuarioController {
     private ReviewService reviewService;
 
     @PostMapping
-    public void cadastrar(@RequestBody Usuario usuario) {
-        usuario.setSenha(passwordEncoder.encode(usuario.getPassword()));
-        repository.save(usuario);
+    public void cadastrar(@RequestBody br.com.alura.screenmatch.dto.DadosCadastroUsuario dados) {
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setLogin(dados.login());
+        novoUsuario.setSenha(passwordEncoder.encode(dados.senha()));
+        repository.save(novoUsuario);
     }
 
     @GetMapping("/meus-favoritos")
