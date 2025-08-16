@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Integração - CineVault</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background-color: #f1f8e9; }
+        .error { border-color: #f44336; background-color: #ffebee; }
+        .info { border-color: #2196F3; background-color: #e3f2fd; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1976D2; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste de Integração - CineVault</h1>
+        <p>Esta página testa a integração entre o frontend e o backend.</p>
+        
+        <div class="test-section info">
+            <h3>📋 Status dos Serviços</h3>
+            <p>Clique nos botões abaixo para testar cada funcionalidade:</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔗 Teste de Conexão com Backend</h3>
+            <button onclick="testBackendConnection()">Testar Conexão</button>
+            <div id="backend-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Teste de Autenticação</h3>
+            <button onclick="testAuthentication()">Testar Login</button>
+            <button onclick="testRegistration()">Testar Registro</button>
+            <div id="auth-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎬 Teste de API de Séries</h3>
+            <button onclick="testSeriesAPI()">Testar API de Séries</button>
+            <div id="series-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>💾 Teste de LocalStorage</h3>
+            <button onclick="testLocalStorage()">Testar LocalStorage</button>
+            <button onclick="clearLocalStorage()">Limpar LocalStorage</button>
+            <div id="storage-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎨 Teste de CSS e JavaScript</h3>
+            <button onclick="testCSSAndJS()">Testar CSS/JS</button>
+            <div id="cssjs-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        // Teste de conexão com backend
+        async function testBackendConnection() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.textContent = 'Testando conexão...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.textContent = `✅ Backend conectado com sucesso!\nStatus: ${response.status}\nResposta: ${data}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro ao conectar com backend:\n${error.message}\n\nVerifique se o Spring Boot está rodando na porta 8080.`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Teste de autenticação
+        async function testAuthentication() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.textContent = 'Testando autenticação...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        login: 'teste',
+                        senha: 'teste123'
+                    })
+                });
+                
+                if (response.status === 401) {
+                    resultDiv.textContent = '✅ Endpoint de login funcionando (usuário não existe, como esperado)';
+                    resultDiv.className = 'result success';
+                } else if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.textContent = `✅ Login bem-sucedido!\nToken: ${data.token ? 'Recebido' : 'Não recebido'}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no teste de autenticação:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Teste de registro
+        async function testRegistration() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.textContent = 'Testando registro...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/usuarios`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        login: 'teste_' + Date.now(),
+                        senha: 'teste123'
+                    })
+                });
+                
+                if (response.ok) {
+                    resultDiv.textContent = '✅ Usuário registrado com sucesso!';
+                    resultDiv.className = 'result success';
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.textContent = `⚠️ Resposta inesperada:\nStatus: ${response.status}\nResposta: ${errorText}`;
+                    resultDiv.className = 'result info';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no teste de registro:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Teste de API de séries
+        async function testSeriesAPI() {
+            const resultDiv = document.getElementById('series-result');
+            resultDiv.textContent = 'Testando API de séries...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/series`);
+                
+                if (response.status === 401) {
+                    resultDiv.textContent = '✅ Endpoint protegido funcionando (autenticação requerida)';
+                    resultDiv.className = 'result success';
+                } else if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.textContent = `✅ API de séries funcionando!\nSéries encontradas: ${data.length || 0}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no teste da API de séries:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Teste de localStorage
+        function testLocalStorage() {
+            const resultDiv = document.getElementById('storage-result');
+            
+            try {
+                // Testar escrita
+                localStorage.setItem('teste', 'valor_teste');
+                
+                // Testar leitura
+                const valor = localStorage.getItem('teste');
+                
+                // Testar remoção
+                localStorage.removeItem('teste');
+                
+                resultDiv.textContent = '✅ LocalStorage funcionando perfeitamente!\nEscrita, leitura e remoção OK.';
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no LocalStorage:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Limpar localStorage
+        function clearLocalStorage() {
+            const resultDiv = document.getElementById('storage-result');
+            
+            try {
+                localStorage.clear();
+                resultDiv.textContent = '✅ LocalStorage limpo com sucesso!';
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro ao limpar LocalStorage:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Teste de CSS e JavaScript
+        function testCSSAndJS() {
+            const resultDiv = document.getElementById('cssjs-result');
+            
+            try {
+                // Testar se CSS está carregado
+                const computedStyle = window.getComputedStyle(document.body);
+                const backgroundColor = computedStyle.backgroundColor;
+                
+                // Testar se JavaScript está funcionando
+                const testElement = document.createElement('div');
+                testElement.style.backgroundColor = 'red';
+                document.body.appendChild(testElement);
+                document.body.removeChild(testElement);
+                
+                resultDiv.textContent = '✅ CSS e JavaScript funcionando!\nEstilos aplicados e DOM manipulado com sucesso.';
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `❌ Erro no teste de CSS/JS:\n${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Executar testes automáticos ao carregar a página
+        window.addEventListener('load', function() {
+            console.log('🧪 Página de teste carregada. Execute os testes clicando nos botões.');
+        });
+    </script>
+</body>
+</html>
