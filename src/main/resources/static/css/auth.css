@@ -1,140 +1,44 @@
-.auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-}
-
-.auth-container {
-    width: 100%;
-    max-width: 420px;
-}
-
-.auth-logo {
-    display: block;
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 2rem;
-}
-
-.auth-form {
-    background-color: var(--color-surface);
-    padding: 2.5rem;
-    border-radius: 8px;
-    border: 1px solid #2A3137;
-}
-
-.auth-form h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-muted);
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    border: 1px solid #2A3137;
-    background-color: var(--color-background);
-    color: var(--color-text);
-    font-size: 1rem;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-}
-
-.auth-form .btn {
-    width: 100%;
-    margin-top: 1rem;
-    padding: 0.8rem;
-    font-size: 1rem;
-}
-
-.auth-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-}
-
-.auth-link a {
-    font-weight: 700;
-}
-
 /* Modal Styles */
 .modal {
-    position: fixed;
-    top: 0;
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.modal.show {
-    opacity: 1;
-    visibility: visible;
+.modal.hidden {
+    display: none;
 }
 
 .modal-content {
-    background: var(--card);
-    padding: 2rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 400px;
+    background-color: #1a1a1a;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px;
+    border-radius: 0.5rem;
     position: relative;
-    transform: translateY(-20px);
-    transition: transform 0.3s ease;
 }
 
-.modal.show .modal-content {
-    transform: translateY(0);
-}
-
+/* The Close Button */
 .close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
+    color: #aaa;
+    float: right;
+    font-size: 28px;
     font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: white;
+    text-decoration: none;
     cursor: pointer;
-    color: var(--muted-foreground);
-    transition: color 0.2s ease;
-}
-
-.close:hover {
-    color: var(--foreground);
-}
-
-.modal h2 {
-    margin-bottom: 1.5rem;
-    color: var(--card-foreground);
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-align: center;
 }
 
 /* Form Styles */
@@ -145,132 +49,22 @@
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--card-foreground);
-    font-weight: 500;
-    font-size: 0.875rem;
 }
 
 .form-group input {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background-color: var(--input);
-    color: var(--foreground);
-    font-size: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #27272a;
+    background-color: #0a0a0a;
+    color: white;
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: var(--ring);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-/* Button Styles */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    margin-top: 1rem;
-}
-
-.btn-primary {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-}
-
-.btn-primary:hover {
-    background-color: rgba(37, 99, 235, 0.9);
-    transform: translateY(-1px);
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Links */
 .modal p {
-    text-align: center;
     margin-top: 1rem;
-    color: var(--muted-foreground);
-    font-size: 0.875rem;
 }
 
 .modal a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.modal a:hover {
-    color: rgba(37, 99, 235, 0.8);
-    text-decoration: underline;
-}
-
-/* Error Messages */
-.error-message {
-    background-color: var(--destructive);
-    color: var(--destructive-foreground);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-.success-message {
-    background-color: #10b981;
-    color: white;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-/* Loading State */
-.loading-spinner {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 0.5rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .modal-content {
-        margin: 1rem;
-        padding: 1.5rem;
-    }
-    
-    .modal h2 {
-        font-size: 1.25rem;
-    }
-}
-
-/* Hide modal when not active */
-.modal.hidden {
-    display: none;
+    color: #3b82f6;
+    cursor: pointer;
 }

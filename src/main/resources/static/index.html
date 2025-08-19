@@ -4,177 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVault - Discover & Rate Movies</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-    <div class="min-h-screen bg-background">
-        <!-- Header -->
-        <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-film h-8 w-8 text-primary">
-                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                            <path d="M7 3v18"></path>
-                            <path d="M3 7.5h4"></path>
-                            <path d="M3 12h18"></path>
-                            <path d="M3 16.5h4"></path>
-                            <path d="M17 3v18"></path>
-                            <path d="M17 7.5h4"></path>
-                            <path d="M17 16.5h4"></path>
-                        </svg>
-                        <span class="text-2xl font-bold text-foreground">CineVault</span>
-                    </div>
-                    
-                    <nav class="hidden md:flex items-center space-x-6">
-                        <a href="#" class="text-foreground hover:text-primary transition-colors">Filmes</a>
-                        <a href="#" class="text-foreground hover:text-primary transition-colors">Listas</a>
-                        <a href="#" class="text-foreground hover:text-primary transition-colors">Avaliações</a>
-                        <button id="loginBtn" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user h-4 w-4 mr-2">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            Entrar
-                        </button>
-                        <button id="registerBtn" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3">
-                            Cadastrar
-                        </button>
-                    </nav>
+<div class="min-h-screen bg-background">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="img/placeholder-logo.svg" alt="CineVault Logo" class="h-8 w-8">
+                    <span class="text-2xl font-bold text-foreground">CineVault</span>
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="text-foreground hover:text-primary transition-colors">Filmes</a>
+                    <a href="#" class="text-foreground hover:text-primary transition-colors">Listas</a>
+                    <a href="#" class="text-foreground hover:text-primary transition-colors">Avaliações</a>
+                    <button id="loginBtn" class="btn">Entrar</button>
+                    <button id="registerBtn" class="btn btn-primary">Cadastrar</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="relative h-[70vh] flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('img/cinematic-movie-theater.png')"></div>
+            <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6">Sua jornada <span class="block text-primary">cinematográfica</span> começa aqui</h1>
+                <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">Descubra, avalie e crie listas dos seus filmes favoritos. Conecte-se com outros cinéfilos e explore o mundo do cinema.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="btn btn-primary btn-lg">Começar agora</button>
+                    <button class="btn btn-secondary btn-lg">Criar lista</button>
                 </div>
             </div>
-        </header>
+        </section>
 
-        <!-- Main Content -->
-        <main>
-            <!-- Hero Section -->
-            <section class="relative h-[70vh] flex items-center justify-center overflow-hidden">
-                <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/cinematic-movie-theater.png')"></div>
-                <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-                    <h1 class="text-5xl md:text-7xl font-bold mb-6">Sua jornada<span class="block text-primary">cinematográfica</span>começa aqui</h1>
-                    <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">Descubra, avalie e crie listas dos seus filmes favoritos. Conecte-se com outros cinéfilos e explore o mundo do cinema.</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-10 rounded-md text-lg px-8 py-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play mr-2 h-5 w-5">
-                                <polygon points="6 3 20 12 6 21 6 3"></polygon>
-                            </svg>
-                            Começar agora
-                        </button>
-                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all border shadow-xs hover:text-accent-foreground h-10 rounded-md text-lg px-8 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus mr-2 h-5 w-5">
-                                <path d="M5 12h14"></path>
-                                <path d="M12 5v14"></path>
-                            </svg>
-                            Criar lista
-                        </button>
-                    </div>
+        <!-- Search Section -->
+        <section class="py-16 bg-card">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Encontre seu próximo filme favorito</h2>
+                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Explore nossa vasta coleção de filmes com ferramentas de busca avançadas</p>
                 </div>
-            </section>
-
-            <!-- Search Section -->
-            <section class="py-16 bg-card">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center mb-12">
-                        <h2 class="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Encontre seu próximo filme favorito</h2>
-                        <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Explore nossa vasta coleção de filmes com ferramentas de busca avançadas</p>
-                    </div>
-                    <div class="max-w-4xl mx-auto">
-                        <div class="bg-background rounded-lg p-6 shadow-sm border border-border">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div class="relative">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <path d="m21 21-4.3-4.3"></path>
-                                    </svg>
-                                    <input type="text" class="flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none pl-10" placeholder="Título do filme">
-                                </div>
-                                <input type="text" class="flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none" placeholder="Diretor">
-                                <input type="text" class="flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none" placeholder="Ano">
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                <input type="text" class="flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none" placeholder="Gênero">
-                                <input type="text" class="flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none" placeholder="Ator/Atriz">
-                                <div class="flex gap-2">
-                                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border shadow-xs hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 flex-1 bg-transparent">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-filter mr-2 h-4 w-4">
-                                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                                        </svg>
-                                        Filtros
-                                    </button>
-                                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-9 px-4 py-2 flex-1">Buscar</button>
-                                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-background rounded-lg p-6 shadow-sm border border-border">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <input type="text" class="input" placeholder="Título do filme">
+                            <input type="text" class="input" placeholder="Diretor">
+                            <input type="text" class="input" placeholder="Ano">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <input type="text" class="input" placeholder="Gênero">
+                            <input type="text" class="input" placeholder="Ator/Atriz">
+                            <div class="flex gap-2">
+                                <button class="btn btn-secondary flex-1">Filtros</button>
+                                <button class="btn btn-primary flex-1">Buscar</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Featured Movies Section -->
-            <section class="py-16 bg-background">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-3xl md:text-4xl font-bold text-foreground">Filmes em Destaque</h2>
-                        <a href="#" class="text-primary hover:text-primary/80 font-medium">Ver todos →</a>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" id="featuredMovies">
-                        <!-- Movies will be loaded dynamically -->
-                    </div>
+        <!-- Featured Movies Section -->
+        <section class="py-16 bg-background">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-foreground">Filmes em Destaque</h2>
+                    <a href="#" class="text-primary hover:text-primary/80 font-medium">Ver todos →</a>
                 </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-muted border-t border-border">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="text-center">
-                    <p class="text-muted-foreground">© 2024 CineVault. Todos os direitos reservados.</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" id="featuredMovies">
+                    <!-- Movies will be loaded dynamically -->
                 </div>
             </div>
-        </footer>
-    </div>
+        </section>
+    </main>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email/Login:</label>
-                    <input type="text" id="loginEmail" name="login" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Senha:</label>
-                    <input type="password" id="loginPassword" name="senha" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Entrar</button>
-            </form>
-            <p>Não tem uma conta? <a href="#" id="showRegister">Cadastre-se</a></p>
+    <!-- Footer -->
+    <footer class="bg-muted border-t border-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+                <p class="text-muted-foreground">© 2024 CineVault. Todos os direitos reservados.</p>
+            </div>
         </div>
-    </div>
+    </footer>
+</div>
 
-    <!-- Register Modal -->
-    <div id="registerModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Cadastro</h2>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="registerEmail">Email/Login:</label>
-                    <input type="text" id="registerEmail" name="login" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerPassword">Senha:</label>
-                    <input type="password" id="registerPassword" name="senha" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Cadastrar</button>
-            </form>
-            <p>Já tem uma conta? <a href="#" id="showLogin">Faça login</a></p>
-        </div>
+<!-- Login Modal -->
+<div id="loginModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">Email/Login:</label>
+                <input type="text" id="loginEmail" name="login" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Senha:</label>
+                <input type="password" id="loginPassword" name="senha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+        <p>Não tem uma conta? <a href="#" id="showRegister">Cadastre-se</a></p>
     </div>
+</div>
 
-    <script src="/js/app.js"></script>
-    <script src="/js/auth.js"></script>
+<!-- Register Modal -->
+<div id="registerModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Cadastro</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="registerEmail">Email/Login:</label>
+                <input type="text" id="registerEmail" name="login" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Senha:</label>
+                <input type="password" id="registerPassword" name="senha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+        <p>Já tem uma conta? <a href="#" id="showLogin">Faça login</a></p>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

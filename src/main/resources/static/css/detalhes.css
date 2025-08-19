@@ -1,167 +1,56 @@
-.details-grid {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 3rem;
-    align-items: flex-start;
+#movieDetails {
+    display: flex;
+    gap: 2rem;
 }
 
-.poster-container img {
+#movieDetails .poster {
+    flex: 1;
+    max-width: 300px;
+}
+
+#movieDetails .poster img {
     width: 100%;
-    border-radius: 8px;
-    border: 1px solid #2A3137;
+    border-radius: 0.5rem;
 }
 
-.info-container h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+#movieDetails .info {
+    flex: 2;
 }
 
-.metadata {
-    display: flex;
-    gap: 1.5rem;
-    color: var(--color-text-muted);
-    margin-bottom: 1.5rem;
-    align-items: center;
+#movieDetails h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-.rating .material-icons {
-    color: var(--color-primary);
-    font-size: 1.5rem;
-}
-
-.actions {
-    margin: 2rem 0;
+#movieDetails .meta {
     display: flex;
     gap: 1rem;
-}
-
-.actions .btn .material-icons {
-    vertical-align: middle;
-    margin-right: 0.5rem;
-}
-
-.plot h3, .seasons h3, .reviews-section h3 {
-    font-size: 1.5rem;
     margin-bottom: 1rem;
-    margin-top: 2rem;
-    border-bottom: 1px solid #2A3137;
-    padding-bottom: 0.5rem;
+    color: #a1a1aa;
 }
 
-.plot p {
-    line-height: 1.7;
-    color: var(--color-text-muted);
-}
-
-#season-select {
-    padding: 0.5rem 1rem;
-    background-color: var(--color-surface);
-    border: 1px solid #2A3137;
-    color: var(--color-text);
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-}
-
-.episode-list {
-    list-style: none;
-    padding: 0;
-    background-color: var(--color-surface);
-    border-radius: 8px;
-}
-
-.episode-list li {
-    padding: 1rem;
-    border-bottom: 1px solid #2A3137;
-}
-
-.episode-list li:last-child {
-    border-bottom: none;
-}
-
-.episode-list li span {
-    color: var(--color-text-muted);
-    margin-right: 1rem;
-    font-weight: 700;
-}
-
-.review-form-container {
-    background-color: var(--color-surface);
-    padding: 2rem;
-    border-radius: 8px;
+#movieDetails .plot {
     margin-bottom: 2rem;
 }
 
-#review-form textarea {
-    width: 100%;
-    height: 100px;
-    padding: 1em;
-    border-radius: 6px;
-    border: 1px solid #2A3137;
-    background-color: var(--color-background);
-    color: var(--color-text);
-    resize: vertical;
-    margin-bottom: 1em;
+.rating-widget {
+    margin-bottom: 2rem;
 }
 
-.star-rating {
-    margin-bottom: 1em;
-}
-
-.star-rating .material-icons {
+.rating-widget .stars {
     font-size: 2rem;
-    color: var(--color-text-muted);
     cursor: pointer;
-    transition: color 0.2s;
 }
 
-.star-rating .material-icons:hover,
-.star-rating .material-icons.active {
-    color: var(--color-primary);
+.rating-widget .stars span:hover {
+    color: #f59e0b;
 }
 
-
-.reviews-list .review {
-    background-color: var(--color-surface);
-    padding: 1.5em;
-    border-radius: 8px;
-    margin-bottom: 1.5em;
-    border-left: 3px solid var(--color-primary);
+.rating-widget .stars span.selected {
+    color: #f59e0b;
 }
 
-.review__header {
-    display: flex;
-    align-items: center;
-    gap: 1em;
-    margin-bottom: 1em;
-}
-
-.review__author {
-    font-weight: 700;
-}
-
-.review__rating {
-    display: flex;
-    align-items: center;
-    color: var(--color-primary);
-}
-
-.review__date {
-    margin-left: auto;
-    color: #aaa;
-    font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-    .details-grid {
-        grid-template-columns: 1fr;
-    }
+.add-to-list-widget {
+    margin-bottom: 2rem;
 }
