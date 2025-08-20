@@ -5,28 +5,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerModal = document.getElementById('registerModal');
     const showRegisterLink = document.getElementById('showRegister');
     const showLoginLink = document.getElementById('showLogin');
-
     const closeButtons = document.querySelectorAll('.close');
 
-    // Function to open a modal
+    const API_BASE_URL = 'http://localhost:8080';
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    // --- Modal Handling ---
     function openModal(modal) {
-        modal.style.display = 'block';
+        if(modal) modal.style.display = 'block';
     }
 
-    // Function to close a modal
     function closeModal(modal) {
-        modal.style.display = 'none';
+        if(modal) modal.style.display = 'none';
     }
 
-    // Event listeners for header buttons
-    if(loginBtn) {
-        loginBtn.addEventListener('click', () => openModal(loginModal));
-    }
+    if(loginBtn) loginBtn.addEventListener('click', () => openModal(loginModal));
     if(registerBtn) {
-        registerBtn.addEventListener('click', () => openModal(registerModal));
+        registerBtn.addEventListener('click', () => {
+            const isLoggedIn = !!localStorage.getItem('authToken');
+            if (isLoggedIn) {
+                logout();
+            } else {
+                openModal(registerModal);
+            }
+        });
     }
 
-    // Event listeners for close buttons
     closeButtons.forEach(button => {
         button.addEventListener('click', () => {
             closeModal(loginModal);
@@ -34,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Event listeners for switching between modals
     if(showRegisterLink) {
         showRegisterLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -51,21 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Close modals if user clicks outside of them
     window.addEventListener('click', (e) => {
-        if (e.target === loginModal) {
-            closeModal(loginModal);
-        }
-        if (e.target === registerModal) {
-            closeModal(registerModal);
-        }
+        if (e.target === loginModal) closeModal(loginModal);
+        if (e.target === registerModal) closeModal(registerModal);
     });
 
-    const API_BASE_URL = 'http://localhost:8080';
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-
-    // Login form submission
+    // --- Authentication Logic ---
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -94,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Register form submission
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -109,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Registration failed');
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Registration failed');
                 }
 
                 alert('Registration successful! Please log in.');
@@ -126,27 +120,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUIAfterLogin() {
         const token = localStorage.getItem('authToken');
         if (token) {
-            // In a real app, you would decode the token to get user info
-            // For now, we'll just change the buttons
-            if(loginBtn) loginBtn.style.display = 'none';
-            if(registerBtn) {
-                registerBtn.textContent = 'Sair';
-                registerBtn.removeEventListener('click', () => openModal(registerModal));
-                registerBtn.addEventListener('click', logout);
-            }
+            document.body.classList.add('logged-in');
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (registerBtn) registerBtn.textContent = 'Sair';
+        } else {
+            document.body.classList.remove('logged-in');
+            if (loginBtn) loginBtn.style.display = 'inline-flex';
+            if (registerBtn) registerBtn.textContent = 'Cadastrar';
         }
     }
 
     function logout() {
         localStorage.removeItem('authToken');
-        if(loginBtn) loginBtn.style.display = 'inline-flex';
-        if(registerBtn) {
-            registerBtn.textContent = 'Cadastrar';
-            registerBtn.removeEventListener('click', logout);
-            registerBtn.addEventListener('click', () => openModal(registerModal));
-        }
+        updateUIAfterLogin();
+        // Optional: redirect to home page or refresh
+        // window.location.href = '/';
     }
 
-    // Check login status on page load
+    // Initial UI update on page load
     updateUIAfterLogin();
 });
