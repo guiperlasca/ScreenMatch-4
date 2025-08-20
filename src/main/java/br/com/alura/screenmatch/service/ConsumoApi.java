@@ -17,13 +17,23 @@ public class ConsumoApi {
     @Value("${omdb.apikey}")
     private String apiKey;
 
-    private final String ENDERECO_BASE = "https://www.omdbapi.com/?t=";
+    private final String ENDERECO_BASE = "https://www.omdbapi.com/";
 
     public String obterDados(String tituloSerie) {
         // Codifica o título da série para ser seguro para URL
         String tituloCodificado = URLEncoder.encode(tituloSerie, StandardCharsets.UTF_8);
-        String endereco = ENDERECO_BASE + tituloCodificado + "&apikey=" + apiKey;
+        String endereco = ENDERECO_BASE + "?t=" + tituloCodificado + "&apikey=" + apiKey;
 
+        return chamarApi(endereco);
+    }
+
+    public String buscarSeries(String termoBusca) {
+        String termoCodificado = URLEncoder.encode(termoBusca, StandardCharsets.UTF_8);
+        String endereco = ENDERECO_BASE + "?s=" + termoCodificado + "&apikey=" + apiKey;
+        return chamarApi(endereco);
+    }
+
+    private String chamarApi(String endereco) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endereco))
@@ -38,7 +48,10 @@ public class ConsumoApi {
 
         String json = response.body();
         if (json.contains("\"Response\":\"False\"")) {
-            throw new RuntimeException("Série não encontrada na API do OMDB: " + tituloSerie);
+            // Não lança exceção para busca, pode retornar uma lista vazia
+            if (!endereco.contains("?s=")) {
+                throw new RuntimeException("Série não encontrada na API do OMDB.");
+            }
         }
         return json;
     }

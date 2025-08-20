@@ -10,7 +10,8 @@ public record SerieDTO(Long id,
                        Categoria genero,
                        String atores,
                        String poster,
-                       String sinopse) {
+                       String sinopse,
+                       String imdbId) {
 
     public SerieDTO(Serie serie) {
         this(serie.getId(),
@@ -20,6 +21,11 @@ public record SerieDTO(Long id,
                 serie.getGenero(),
                 serie.getAtores(),
                 serie.getPoster(),
-                serie.getSinopse());
+                serie.getSinopse(),
+                null); // imdbId não é armazenado na entidade Serie por padrão
+    }
+
+    public SerieDTO(Long id, String titulo, String poster, String imdbId) {
+        this(id, titulo, 0, 0.0, null, null, poster, null, imdbId);
     }
 }
