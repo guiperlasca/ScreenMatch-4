@@ -1,58 +1,93 @@
 document.addEventListener('DOMContentLoaded', () => {
     const featuredMoviesContainer = document.getElementById('featuredMovies');
-
     const API_BASE_URL = 'http://localhost:8080';
 
     async function loadFeaturedMovies() {
-        // Using fallback movies directly because the backend is not working.
-        setTimeout(() => {
-            renderMovies(getFallbackMovies());
-        }, 500);
+        try {
+            const response = await fetch(`${API_BASE_URL}/series/top5`);
+            if (!response.ok) {
+                throw new Error('Failed to load featured movies.');
+            }
+            const movies = await response.json();
+            renderMovies(movies, featuredMoviesContainer);
+        } catch (error) {
+            console.error('Error loading featured movies:', error);
+            if (featuredMoviesContainer) {
+                featuredMoviesContainer.innerHTML = '<p class="text-red-500">Could not load featured movies.</p>';
+            }
+        }
     }
 
-    function renderMovies(movies) {
-        if (!featuredMoviesContainer) return;
-        featuredMoviesContainer.innerHTML = '';
+    function renderMovies(movies, container) {
+        if (!container) return;
+        container.innerHTML = '';
+        if (movies.length === 0) {
+            container.innerHTML = '<p>No movies found.</p>';
+            return;
+        }
         movies.forEach(movie => {
             const movieCard = createMovieCard(movie);
-            featuredMoviesContainer.appendChild(movieCard);
+            container.appendChild(movieCard);
         });
     }
 
     function createMovieCard(movie) {
         const card = document.createElement('a');
-        card.className = 'movie-card';
+        card.className = 'movie-card block border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300';
         card.href = `detalhes.html?id=${movie.id}`;
         card.innerHTML = `
-            <img src="${movie.poster || '/img/placeholder.jpg'}" alt="${movie.titulo}" class="movie-poster">
+            <img src="${movie.poster || 'img/placeholder.jpg'}" alt="${movie.titulo}" class="w-full h-auto object-cover">
             <div class="p-4">
-                <h3 class="movie-title">${movie.titulo}</h3>
-                <p class="movie-year">${movie.ano || 'N/A'}</p>
-                <p class="movie-genre">${movie.genero || 'N/A'}</p>
+                <h3 class="font-bold text-lg text-foreground">${movie.titulo}</h3>
+                <p class="text-sm text-muted-foreground">${movie.ano || 'N/A'}</p>
+                <p class="text-sm text-muted-foreground">${movie.genero || 'N/A'}</p>
             </div>
         `;
         return card;
     }
 
-    function getFallbackMovies() {
-        return [
-            { id: 1, titulo: 'Oppenheimer', ano: 2023, genero: 'Drama, História', poster: 'img/oppenheimer-inspired-poster.png', sinopse: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.' },
-            { id: 2, titulo: 'Duna: Parte Dois', ano: 2024, genero: 'Ficção Científica', poster: 'img/dune-part-two-poster.png', sinopse: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.' },
-            { id: 3, titulo: 'Parasita', ano: 2019, genero: 'Thriller, Drama', poster: 'img/parasite-movie-poster.png', sinopse: 'Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.' },
-            { id: 4, titulo: 'La La Land', ano: 2016, genero: 'Musical, Romance', poster: 'img/la-la-land-inspired-poster.png', sinopse: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future.' },
-            { id: 5, titulo: 'Interestelar', ano: 2014, genero: 'Ficção Científica', poster: 'img/interstellar-inspired-poster.png', sinopse: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.' },
-            { id: 6, titulo: 'Coringa', ano: 2019, genero: 'Drama, Crime', poster: 'img/stylized-villain-poster.png', sinopse: 'A mentally troubled comedian embarking on a downward spiral of social revolution and bloody crime in Gotham City.' },
-        ];
-    }
-
     loadFeaturedMovies();
 
     const searchButton = document.querySelector('button.btn-primary.flex-1');
-    if (searchButton && searchButton.textContent === 'Buscar') {
+    const searchInput = document.querySelector('input[placeholder="Título do filme"]');
+    const searchResultsContainer = document.createElement('div');
+    searchResultsContainer.className = 'mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6';
+
+    const featuredMoviesSection = document.getElementById('featuredMovies').parentElement;
+
+    if (searchButton && searchInput) {
         searchButton.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
     }
 
     async function handleSearch() {
-        alert("Search is disabled because the backend is not available.");
+        const query = searchInput.value.trim();
+        if (!query) {
+            // If search is cleared, show featured movies again
+            searchResultsContainer.remove();
+            document.getElementById('featuredMovies').style.display = 'grid';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/series/buscar?titulo=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                throw new Error('Search failed.');
+            }
+            const movies = await response.json();
+
+            // Hide featured movies and show search results
+            document.getElementById('featuredMovies').style.display = 'none';
+            featuredMoviesSection.appendChild(searchResultsContainer);
+            renderMovies(movies, searchResultsContainer);
+
+        } catch (error) {
+            console.error('Error during search:', error);
+            searchResultsContainer.innerHTML = '<p class="text-red-500">Search failed. Please try again later.</p>';
+        }
     }
 });

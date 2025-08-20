@@ -1,55 +1,60 @@
 document.addEventListener('DOMContentLoaded', () => {
     const movieDetailsContainer = document.getElementById('movieDetails');
+    const API_BASE_URL = 'http://localhost:8080';
 
     const urlParams = new URLSearchParams(window.location.search);
-    const movieId = parseInt(urlParams.get('id'));
+    const movieId = urlParams.get('id');
 
     if (!movieId) {
-        movieDetailsContainer.innerHTML = '<p>Movie ID not found.</p>';
+        if (movieDetailsContainer) {
+            movieDetailsContainer.innerHTML = '<p class="text-red-500">Movie ID not found in URL.</p>';
+        }
         return;
     }
 
-    function getFallbackMovies() {
-        return [
-            { id: 1, titulo: 'Oppenheimer', ano: 2023, genero: 'Drama, História', poster: '/img/oppenheimer-inspired-poster.png', sinopse: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', avaliacao: 8.6 },
-            { id: 2, titulo: 'Duna: Parte Dois', ano: 2024, genero: 'Ficção Científica', poster: '/img/dune-part-two-poster.png', sinopse: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', avaliacao: 8.9 },
-            { id: 3, titulo: 'Parasita', ano: 2019, genero: 'Thriller, Drama', poster: '/img/parasite-movie-poster.png', sinopse: 'Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.', avaliacao: 8.5 },
-            { id: 4, titulo: 'La La Land', ano: 2016, genero: 'Musical, Romance', poster: '/img/la-la-land-inspired-poster.png', sinopse: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future.', avaliacao: 8.0 },
-            { id: 5, titulo: 'Interestelar', ano: 2014, genero: 'Ficção Científica', poster: '/img/interstellar-inspired-poster.png', sinopse: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.', avaliacao: 8.7 },
-            { id: 6, titulo: 'Coringa', ano: 2019, genero: 'Drama, Crime', poster: '/img/stylized-villain-poster.png', sinopse: 'A mentally troubled comedian embarking on a downward spiral of social revolution and bloody crime in Gotham City.', avaliacao: 8.4 },
-        ];
-    }
-
-    const movie = getFallbackMovies().find(m => m.id === movieId);
-
-    if (!movie) {
-        movieDetailsContainer.innerHTML = '<p>Movie not found.</p>';
-        return;
+    async function loadMovieDetails() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/series/${movieId}`);
+            if (!response.ok) {
+                throw new Error('Failed to load movie details.');
+            }
+            const movie = await response.json();
+            renderMovieDetails(movie);
+        } catch (error) {
+            console.error('Error loading movie details:', error);
+            if (movieDetailsContainer) {
+                movieDetailsContainer.innerHTML = '<p class="text-red-500">Could not load movie details.</p>';
+            }
+        }
     }
 
     function renderMovieDetails(movie) {
+        if (!movieDetailsContainer) return;
+        document.title = `${movie.titulo} - CineVault`;
         movieDetailsContainer.innerHTML = `
-            <div class="poster">
-                <img src="${movie.poster || '/img/placeholder.jpg'}" alt="${movie.titulo}">
+            <div class="poster-container">
+                <img src="${movie.poster || 'img/placeholder.jpg'}" alt="Poster for ${movie.titulo}" class="poster-img">
             </div>
-            <div class="info">
-                <h1>${movie.titulo}</h1>
-                <div class="meta">
+            <div class="info-container">
+                <h1 class="text-4xl font-bold text-foreground">${movie.titulo}</h1>
+                <div class="meta-info">
                     <span>${movie.ano}</span>
                     <span>${movie.genero}</span>
-                    <span>IMDb: ${movie.avaliacao}</span>
+                    <span class="imdb-rating">IMDb: ${movie.avaliacao || 'N/A'}</span>
                 </div>
                 <p class="plot">${movie.sinopse}</p>
                 
-                <div class="rating-widget">
-                    <h3>Avalie este filme:</h3>
+                <div class="rating-widget mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Avalie este filme:</h3>
                     <div class="stars" data-movie-id="${movie.id}">
-                        ${[1, 2, 3, 4, 5].map(i => `<span data-value="${i}">&#9734;</span>`).join('')}
+                        ${[1, 2, 3, 4, 5].map(i => `<span class="star" data-value="${i}">&#9734;</span>`).join('')}
                     </div>
+                    <p class="rating-feedback hidden mt-2"></p>
                 </div>
 
-                <div class="add-to-list-widget">
+                <div class="add-to-list-widget mt-6">
                      <button id="addToListBtn" class="btn btn-primary">Adicionar à minha lista</button>
+                     <p class="list-feedback hidden mt-2"></p>
                 </div>
             </div>
         `;
@@ -59,21 +64,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addRatingFunctionality() {
         const starsContainer = document.querySelector('.stars');
+        const feedbackP = document.querySelector('.rating-feedback');
         if (!starsContainer) return;
 
-        starsContainer.addEventListener('click', () => {
-            alert('Rating is disabled because the backend is not available.');
+        starsContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('star')) {
+                const rating = e.target.dataset.value;
+                const movieId = starsContainer.dataset.movieId;
+                const token = localStorage.getItem('authToken');
+
+                if (!token) {
+                    feedbackP.textContent = 'You must be logged in to rate a movie.';
+                    feedbackP.className = 'rating-feedback mt-2 text-red-500';
+                    feedbackP.classList.remove('hidden');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/avaliacoes/series/${movieId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ pontuacao: rating, comentario: "No comment" })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to submit rating.');
+                    }
+
+                    feedbackP.textContent = `You rated this movie ${rating} stars.`;
+                    feedbackP.className = 'rating-feedback mt-2 text-green-500';
+                    feedbackP.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Error submitting rating:', error);
+                    feedbackP.textContent = 'Failed to submit rating. Please try again.';
+                    feedbackP.className = 'rating-feedback mt-2 text-red-500';
+                    feedbackP.classList.remove('hidden');
+                }
+            }
         });
     }
 
     function addToListFunctionality() {
         const addToListBtn = document.getElementById('addToListBtn');
-        if(addToListBtn) {
-            addToListBtn.addEventListener('click', () => {
-                alert('Add to list functionality is disabled because the backend is not available.');
-            });
-        }
+        const feedbackP = document.querySelector('.list-feedback');
+        if (!addToListBtn) return;
+
+        addToListBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                feedbackP.textContent = 'You must be logged in to add movies to a list.';
+                feedbackP.className = 'list-feedback mt-2 text-red-500';
+                feedbackP.classList.remove('hidden');
+                return;
+            }
+
+            // This is a placeholder as the specific list is not selected.
+            // In a real app, you'd have a dropdown or modal to select the list.
+            // We'll try to add to a list with a hardcoded ID or a default user list.
+            // For now, we just show a message.
+            feedbackP.textContent = 'This functionality is not fully implemented yet.';
+            feedbackP.className = 'list-feedback mt-2 text-yellow-500';
+            feedbackP.classList.remove('hidden');
+        });
     }
 
-    renderMovieDetails(movie);
+    loadMovieDetails();
 });
