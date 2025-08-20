@@ -37,7 +37,7 @@ public class UsuarioController {
     @GetMapping("/meus-favoritos")
     public List<SerieDTO> getFavoritos(@AuthenticationPrincipal Usuario usuario) {
         return usuario.getFavoritas().stream()
-                .map(s -> new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse()))
+                .map(SerieDTO::new)
                 .collect(Collectors.toList());
     }
 

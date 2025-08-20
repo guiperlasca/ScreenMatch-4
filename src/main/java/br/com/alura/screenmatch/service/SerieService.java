@@ -3,15 +3,14 @@ package br.com.alura.screenmatch.service;
 import br.com.alura.screenmatch.dto.DadosCadastroSerieDTO;
 import br.com.alura.screenmatch.dto.EpisodioDTO;
 import br.com.alura.screenmatch.dto.SerieDTO;
-import br.com.alura.screenmatch.model.Categoria;
-import br.com.alura.screenmatch.model.DadosSerie;
-import br.com.alura.screenmatch.model.Serie;
-import br.com.alura.screenmatch.model.Usuario;
+import br.com.alura.screenmatch.model.*;
 import br.com.alura.screenmatch.repository.SerieRepository;
 import br.com.alura.screenmatch.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ public class SerieService {
         Optional<Serie> serie = repository.findById(id);
         if (serie.isPresent()) {
             Serie s = serie.get();
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse());
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), null);
         }
         return null; // Idealmente, lançar uma exceção Not Found
     }
@@ -119,19 +118,36 @@ public class SerieService {
     }
 
     public List<SerieDTO> buscarSeries(String termo) {
-        List<Serie> series = repository.findByTermo(termo);
+        // Busca primeiro no banco de dados local
+        List<Serie> seriesLocais = repository.findByTermo(termo);
 
+        // Converte para DTO
+        List<SerieDTO> seriesDto = new ArrayList<>(converteDados(seriesLocais));
+
+        // Se não encontrar no banco local, busca na API do OMDB
+        if (seriesLocais.isEmpty()) {
+            String json = consumoApi.buscarSeries(termo);
+            if (json != null && !json.isEmpty()) {
+                DadosBuscaOMDB dadosBusca = conversor.obterDados(json, DadosBuscaOMDB.class);
+                if (dadosBusca != null && dadosBusca.series() != null) {
+                    List<SerieDTO> seriesApi = dadosBusca.series().stream()
+                            .map(d -> new SerieDTO(null, d.titulo(), d.poster(), d.imdbID()))
+                            .collect(Collectors.toList());
+                    seriesDto.addAll(seriesApi);
+                }
+            }
+        }
+
+        // Tenta buscar por categoria também
         try {
             Categoria categoria = Categoria.fromPortugues(termo.trim());
-            series.addAll(repository.findByGenero(categoria));
+            List<Serie> seriesPorCategoria = repository.findByGenero(categoria);
+            seriesDto.addAll(converteDados(seriesPorCategoria));
         } catch (IllegalArgumentException e) {
             // O termo não é um gênero válido, ignora.
         }
 
-        return series.stream()
-                .distinct()
-                .map(SerieDTO::new)
-                .collect(Collectors.toList());
+        return seriesDto.stream().distinct().collect(Collectors.toList());
     }
 
     private List<SerieDTO> converteDados(List<Serie> series) {
