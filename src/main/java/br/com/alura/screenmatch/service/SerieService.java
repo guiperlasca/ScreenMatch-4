@@ -118,8 +118,20 @@ public class SerieService {
         return new SerieDTO(serie);
     }
 
-    public List<SerieDTO> buscarSeries(String titulo) {
-        return converteDados(repository.findByTituloContainingIgnoreCase(titulo));
+    public List<SerieDTO> buscarSeries(String termo) {
+        List<Serie> series = repository.findByTermo(termo);
+
+        try {
+            Categoria categoria = Categoria.fromPortugues(termo.trim());
+            series.addAll(repository.findByGenero(categoria));
+        } catch (IllegalArgumentException e) {
+            // O termo não é um gênero válido, ignora.
+        }
+
+        return series.stream()
+                .distinct()
+                .map(SerieDTO::new)
+                .collect(Collectors.toList());
     }
 
     private List<SerieDTO> converteDados(List<Serie> series) {

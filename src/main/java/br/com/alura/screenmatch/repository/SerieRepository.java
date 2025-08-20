@@ -11,6 +11,9 @@ import java.util.Optional;
 
 public interface SerieRepository extends JpaRepository<Serie, Long> {
 
+    @Query("SELECT s FROM Serie s WHERE s.titulo ILIKE %:termo% OR s.atores ILIKE %:termo%")
+    List<Serie> findByTermo(String termo);
+
     List<Serie> findByTituloContainingIgnoreCase(String nomeSerie);
 
     List<Serie> findByAtoresContainingIgnoreCaseAndAvaliacaoGreaterThanEqual(String nomeAtor, Double avaliacao);
