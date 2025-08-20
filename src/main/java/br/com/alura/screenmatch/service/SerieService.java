@@ -127,24 +127,4 @@ public class SerieService {
                 .map(SerieDTO::new) // Usando construtor de SerieDTO(Serie)
                 .collect(Collectors.toList());
     }
-
-    public org.springframework.data.domain.Page<SerieDTO> buscarSeriesAvancada(br.com.alura.screenmatch.dto.BuscaAvancadaDTO dto, org.springframework.data.domain.Pageable pageable) {
-        // Placeholder implementation
-        return org.springframework.data.domain.Page.empty();
-    }
-
-    public List<String> obterSugestoes(String query) {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
-    }
-
-    public List<String> obterTodosGeneros() {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
-    }
-
-    public List<Integer> obterTodosAnos() {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
-    }
 }
