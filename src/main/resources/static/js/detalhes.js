@@ -124,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // This is a placeholder as the specific list is not selected.
             // In a real app, you'd have a dropdown or modal to select the list.
-            // We'll try to add to a list with a hardcoded ID or a default user list.
             // For now, we just show a message.
             feedbackP.textContent = 'This functionality is not fully implemented yet.';
             feedbackP.className = 'list-feedback mt-2 text-yellow-500';
