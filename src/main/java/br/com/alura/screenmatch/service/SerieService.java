@@ -45,7 +45,7 @@ public class SerieService {
         Optional<Serie> serie = repository.findById(id);
         if (serie.isPresent()) {
             Serie s = serie.get();
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), null);
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAnoLancamento(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), null);
         }
         return null; // Idealmente, lançar uma exceção Not Found
     }
@@ -131,7 +131,7 @@ public class SerieService {
                 DadosBuscaOMDB dadosBusca = conversor.obterDados(json, DadosBuscaOMDB.class);
                 if (dadosBusca != null && dadosBusca.series() != null) {
                     List<SerieDTO> seriesApi = dadosBusca.series().stream()
-                            .map(d -> new SerieDTO(null, d.titulo(), d.poster(), d.imdbID()))
+                            .map(d -> new SerieDTO(null, d.titulo(), d.poster(), d.imdbID(), Integer.valueOf(d.ano().split("–")[0])))
                             .collect(Collectors.toList());
                     seriesDto.addAll(seriesApi);
                 }
