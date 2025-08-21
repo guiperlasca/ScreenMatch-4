@@ -25,6 +25,8 @@ public class Serie {
 
     private Integer totalTemporadas;
 
+    private Integer anoDeLancamento;
+
     private Double avaliacao;
 
     @Enumerated(EnumType.STRING)
@@ -53,8 +55,8 @@ public class Serie {
         this.genero = Categoria.fromString(dadosSerie.genero().split(",")[0].trim());
         this.atores = dadosSerie.atores();
         this.poster = dadosSerie.poster();
-//        this.sinopse = ConsultaChatGPT.obterTraducao(dadosSerie.sinopse()).trim();
         this.sinopse = ServicoDeTraducao.obterTraducao(dadosSerie.sinopse()).trim();
+        this.anoDeLancamento = Integer.valueOf(dadosSerie.ano().split("–")[0]);
     }
 
     public Long getId() {
@@ -88,6 +90,14 @@ public class Serie {
 
     public void setTotalTemporadas(Integer totalTemporadas) {
         this.totalTemporadas = totalTemporadas;
+    }
+
+    public Integer getAnoLancamento() {
+        return anoDeLancamento;
+    }
+
+    public void setAnoLancamento(Integer anoDeLancamento) {
+        this.anoDeLancamento = anoDeLancamento;
     }
 
     public Double getAvaliacao() {
