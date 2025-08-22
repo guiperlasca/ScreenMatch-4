@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const movieDetailsContainer = document.getElementById('movieDetails');
-    const API_BASE_URL = 'http://localhost:8080';
 
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');

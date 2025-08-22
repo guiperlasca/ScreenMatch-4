@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLoginLink = document.getElementById('showLogin');
     const closeButtons = document.querySelectorAll('.close');
 
-    const API_BASE_URL = 'http://localhost:8080';
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
 

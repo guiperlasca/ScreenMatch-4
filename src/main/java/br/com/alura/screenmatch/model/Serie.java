@@ -51,12 +51,20 @@ public class Serie {
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
         this.totalTemporadas = dadosSerie.totalTemporadas();
-        this.avaliacao = OptionalDouble.of(Double.valueOf(dadosSerie.avaliacao())).orElse(0.0);
+        try {
+            this.avaliacao = Double.valueOf(dadosSerie.avaliacao());
+        } catch (NumberFormatException e) {
+            this.avaliacao = 0.0;
+        }
         this.genero = Categoria.fromString(dadosSerie.genero().split(",")[0].trim());
         this.atores = dadosSerie.atores();
         this.poster = dadosSerie.poster();
         this.sinopse = ServicoDeTraducao.obterTraducao(dadosSerie.sinopse()).trim();
-        this.anoDeLancamento = Integer.valueOf(dadosSerie.ano().split("–")[0]);
+        try {
+            this.anoDeLancamento = Integer.valueOf(dadosSerie.ano().split("–")[0]);
+        } catch (NumberFormatException e) {
+            this.anoDeLancamento = null;
+        }
     }
 
     public Long getId() {
