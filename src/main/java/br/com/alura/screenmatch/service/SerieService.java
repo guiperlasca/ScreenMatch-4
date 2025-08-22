@@ -6,7 +6,9 @@ import br.com.alura.screenmatch.dto.SerieDTO;
 import br.com.alura.screenmatch.model.*;
 import br.com.alura.screenmatch.repository.SerieRepository;
 import br.com.alura.screenmatch.repository.UsuarioRepository;
+import br.com.alura.screenmatch.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,27 +40,21 @@ public class SerieService {
     }
 
     public List<SerieDTO> obterLancamentos() {
-        return converteDados(repository.findTop5ByEpisodioDataLancamento());
+        return converteDados(repository.findLatestReleases(PageRequest.of(0, 5)));
     }
 
     public SerieDTO obterPorId(Long id) {
-        Optional<Serie> serie = repository.findById(id);
-        if (serie.isPresent()) {
-            Serie s = serie.get();
-            return new SerieDTO(s.getId(), s.getTitulo(), s.getTotalTemporadas(), s.getAnoLancamento(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), null);
-        }
-        return null; // Idealmente, lançar uma exceção Not Found
+        Serie serie = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Série não encontrada com id: " + id));
+        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAnoLancamento(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), null);
     }
 
     public List<EpisodioDTO> obterTodasTemporadas(Long id) {
-        Optional<Serie> serie = repository.findById(id);
-        if (serie.isPresent()) {
-            Serie s = serie.get();
-            return s.getEpisodios().stream()
-                    .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
-                    .collect(Collectors.toList());
-        }
-        return null; // Idealmente, lançar uma exceção
+        Serie serie = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Série não encontrada com id: " + id));
+        return serie.getEpisodios().stream()
+                .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
+                .collect(Collectors.toList());
     }
 
     public List<EpisodioDTO> obterTemporadasPorNumero(Long id, Long numero) {
@@ -118,36 +114,36 @@ public class SerieService {
     }
 
     public List<SerieDTO> buscarSeries(String termo) {
-        // Busca primeiro no banco de dados local
-        List<Serie> seriesLocais = repository.findByTermo(termo);
+        List<Serie> seriesEncontradas = new ArrayList<>(repository.findByTermo(termo));
 
-        // Converte para DTO
-        List<SerieDTO> seriesDto = new ArrayList<>(converteDados(seriesLocais));
-
-        // Se não encontrar no banco local, busca na API do OMDB
-        if (seriesLocais.isEmpty()) {
-            String json = consumoApi.buscarSeries(termo);
-            if (json != null && !json.isEmpty()) {
-                DadosBuscaOMDB dadosBusca = conversor.obterDados(json, DadosBuscaOMDB.class);
-                if (dadosBusca != null && dadosBusca.series() != null) {
-                    List<SerieDTO> seriesApi = dadosBusca.series().stream()
-                            .map(d -> new SerieDTO(null, d.titulo(), d.poster(), d.imdbID(), Integer.valueOf(d.ano().split("–")[0])))
-                            .collect(Collectors.toList());
-                    seriesDto.addAll(seriesApi);
-                }
-            }
-        }
-
-        // Tenta buscar por categoria também
         try {
             Categoria categoria = Categoria.fromPortugues(termo.trim());
-            List<Serie> seriesPorCategoria = repository.findByGenero(categoria);
-            seriesDto.addAll(converteDados(seriesPorCategoria));
+            seriesEncontradas.addAll(repository.findByGenero(categoria));
         } catch (IllegalArgumentException e) {
             // O termo não é um gênero válido, ignora.
         }
 
-        return seriesDto.stream().distinct().collect(Collectors.toList());
+        List<SerieDTO> seriesDto = seriesEncontradas.stream()
+                .distinct()
+                .map(SerieDTO::new)
+                .collect(Collectors.toList());
+
+        if (seriesDto.isEmpty()) {
+            try {
+                String json = consumoApi.obterDados(termo);
+                DadosSerie dadosSerieApi = conversor.obterDados(json, DadosSerie.class);
+                if (dadosSerieApi != null && dadosSerieApi.titulo() != null) {
+                    Serie novaSerie = new Serie(dadosSerieApi);
+                    repository.save(novaSerie);
+                    seriesDto.add(new SerieDTO(novaSerie));
+                }
+            } catch (Exception e) {
+                // Log the exception or handle it as needed
+                System.err.println("Erro ao buscar série na API externa: " + e.getMessage());
+            }
+        }
+
+        return seriesDto;
     }
 
     private List<SerieDTO> converteDados(List<Serie> series) {

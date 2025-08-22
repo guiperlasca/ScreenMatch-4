@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const featuredMoviesContainer = document.getElementById('featuredMovies');
-    const API_BASE_URL = 'http://localhost:8080';
 
     async function loadFeaturedMovies() {
         try {
@@ -27,11 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         movies.forEach(movie => {
             const movieCard = createMovieCard(movie);
-            container.appendChild(movieCard);
+            if (movieCard) {
+                container.appendChild(movieCard);
+            }
         });
     }
 
     function createMovieCard(movie) {
+        if (!movie.id) {
+            console.warn('Skipping movie card creation because movie.id is missing', movie);
+            return null;
+        }
         const card = document.createElement('a');
         card.className = 'movie-card block border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300';
         card.href = `detalhes.html?id=${movie.id}`;

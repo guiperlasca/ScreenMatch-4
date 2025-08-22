@@ -37,8 +37,8 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
     @Query("SELECT s FROM Serie s " +
             "JOIN s.episodios e " +
             "GROUP BY s " +
-            "ORDER BY MAX(e.dataLancamento) DESC LIMIT 5")
-    List<Serie> findTop5ByEpisodioDataLancamento();
+            "ORDER BY MAX(e.dataLancamento) DESC")
+    List<Serie> findLatestReleases(org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT e FROM Serie s JOIN s.episodios e WHERE s.id = :id AND e.temporada = :numero")
     List<Episodio> obterEpisodiosPorTemporada(Long id, Long numero);
