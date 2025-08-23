@@ -1,141 +1,481 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const loginModal = document.getElementById('loginModal');
-    const registerModal = document.getElementById('registerModal');
-    const showRegisterLink = document.getElementById('showRegister');
-    const showLoginLink = document.getElementById('showLogin');
-    const closeButtons = document.querySelectorAll('.close');
-
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-
-    // --- Modal Handling ---
-    function openModal(modal) {
-        if(modal) modal.style.display = 'block';
+// Authentication Management
+class AuthManager {
+    constructor() {
+        this.currentUser = null;
+        this.loginModal = null;
+        this.signupModal = null;
+        this.init();
     }
 
-    function closeModal(modal) {
-        if(modal) modal.style.display = 'none';
+    init() {
+        this.setupModals();
+        this.setupEventListeners();
+        this.checkAuthStatus();
     }
 
-    if(loginBtn) loginBtn.addEventListener('click', () => openModal(loginModal));
-    if(registerBtn) {
-        registerBtn.addEventListener('click', () => {
-            const isLoggedIn = !!localStorage.getItem('authToken');
-            if (isLoggedIn) {
-                logout();
-            } else {
-                openModal(registerModal);
-            }
-        });
+    setupModals() {
+        this.loginModal = document.getElementById('loginModal');
+        this.signupModal = document.getElementById('signupModal');
+        
+        // Setup modal controls
+        this.setupModalControls();
     }
 
-    closeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            closeModal(loginModal);
-            closeModal(registerModal);
-        });
-    });
+    setupModalControls() {
+        // Login modal controls
+        const loginBtn = document.getElementById('loginBtn');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const switchToSignup = document.getElementById('switchToSignup');
 
-    if(showRegisterLink) {
-        showRegisterLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeModal(loginModal);
-            openModal(registerModal);
-        });
-    }
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => this.showLoginModal());
+        }
 
-    if(showLoginLink) {
-        showLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeModal(registerModal);
-            openModal(loginModal);
-        });
-    }
+        if (closeLoginModal) {
+            closeLoginModal.addEventListener('click', () => this.hideLoginModal());
+        }
 
-    window.addEventListener('click', (e) => {
-        if (e.target === loginModal) closeModal(loginModal);
-        if (e.target === registerModal) closeModal(registerModal);
-    });
+        if (switchToSignup) {
+            switchToSignup.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.hideLoginModal();
+                this.showSignupModal();
+            });
+        }
 
-    // --- Authentication Logic ---
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(loginForm);
-            const data = Object.fromEntries(formData.entries());
+        // Signup modal controls
+        const signupBtn = document.getElementById('signupBtn');
+        const closeSignupModal = document.getElementById('closeSignupModal');
+        const switchToLogin = document.getElementById('switchToLogin');
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+        if (signupBtn) {
+            signupBtn.addEventListener('click', () => this.showSignupModal());
+        }
+
+        if (closeSignupModal) {
+            closeSignupModal.addEventListener('click', () => this.hideSignupModal());
+        }
+
+        if (switchToLogin) {
+            switchToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.hideSignupModal();
+                this.showLoginModal();
+            });
+        }
+
+        // Close modals when clicking outside
+        [this.loginModal, this.signupModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        this.hideModal(modal);
+                    }
                 });
+            }
+        });
 
-                if (!response.ok) {
-                    throw new Error('Login failed');
-                }
-
-                const result = await response.json();
-                localStorage.setItem('authToken', result.token);
-                updateUIAfterLogin();
-                closeModal(loginModal);
-            } catch (error) {
-                console.error('Error during login:', error);
-                alert('Login failed. Please check your credentials.');
+        // Close modals with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideLoginModal();
+                this.hideSignupModal();
             }
         });
     }
 
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(registerForm);
-            const data = Object.fromEntries(formData.entries());
+    setupEventListeners() {
+        // Login form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/usuarios/cadastro`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
+        // Signup form
+        const signupForm = document.getElementById('signupForm');
+        if (signupForm) {
+            signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+        }
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Registration failed');
+        // Logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLogout();
+            });
+        }
+
+        // Get started button
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        if (getStartedBtn) {
+            getStartedBtn.addEventListener('click', () => {
+                if (this.isAuthenticated()) {
+                    // Scroll to featured section or go to profile
+                    document.getElementById('featuredSection')?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    this.showSignupModal();
                 }
-
-                alert('Registration successful! Please log in.');
-                closeModal(registerModal);
-                openModal(loginModal);
-            } catch (error) {
-                console.error('Error during registration:', error);
-                alert(`Registration failed: ${error.message}`);
-            }
-        });
-    }
-
-    function updateUIAfterLogin() {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            document.body.classList.add('logged-in');
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (registerBtn) registerBtn.textContent = 'Sair';
-        } else {
-            document.body.classList.remove('logged-in');
-            if (loginBtn) loginBtn.style.display = 'inline-flex';
-            if (registerBtn) registerBtn.textContent = 'Cadastrar';
+            });
         }
     }
 
-    function logout() {
-        localStorage.removeItem('authToken');
-        updateUIAfterLogin();
-        // Optional: redirect to home page or refresh
-        // window.location.href = '/';
+    async handleLogin(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const formData = new FormData(form);
+        
+        const credentials = {
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+
+        // Validate form
+        if (!this.validateLoginForm(credentials)) {
+            return;
+        }
+
+        try {
+            // Show loading state
+            this.setButtonLoading(submitBtn, true);
+            
+            // Call API
+            await apiService.login(credentials);
+            
+            // Success
+            this.hideLoginModal();
+            this.showNotification('Login realizado com sucesso!', 'success');
+            this.updateAuthUI();
+            
+            // Reset form
+            form.reset();
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showNotification(error.message || 'Erro ao fazer login', 'error');
+        } finally {
+            this.setButtonLoading(submitBtn, false);
+        }
     }
 
-    // Initial UI update on page load
-    updateUIAfterLogin();
+    async handleSignup(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const formData = new FormData(form);
+        
+        const userData = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            confirmPassword: formData.get('confirmPassword')
+        };
+
+        // Validate form
+        if (!this.validateSignupForm(userData)) {
+            return;
+        }
+
+        try {
+            // Show loading state
+            this.setButtonLoading(submitBtn, true);
+            
+            // Call API
+            await apiService.register(userData);
+            
+            // Success - now login automatically
+            await apiService.login({
+                email: userData.email,
+                password: userData.password
+            });
+            
+            this.hideSignupModal();
+            this.showNotification('Conta criada com sucesso!', 'success');
+            this.updateAuthUI();
+            
+            // Reset form
+            form.reset();
+            
+        } catch (error) {
+            console.error('Signup error:', error);
+            let errorMessage = error.message || 'Erro ao criar conta';
+            
+            // Mensagens específicas para diferentes tipos de erro
+            if (errorMessage.includes('Email já está em uso')) {
+                errorMessage = 'Este email já está cadastrado. Tente fazer login ou use outro email.';
+            } else if (errorMessage.includes('Credenciais inválidas')) {
+                errorMessage = 'Erro no login automático. Por favor, faça login manualmente.';
+            }
+            
+            this.showNotification(errorMessage, 'error');
+        } finally {
+            this.setButtonLoading(submitBtn, false);
+        }
+    }
+
+    handleLogout() {
+        try {
+            apiService.logout();
+            this.showNotification('Logout realizado com sucesso!', 'success');
+        } catch (error) {
+            console.error('Logout error:', error);
+            this.showNotification('Erro ao fazer logout', 'error');
+        }
+    }
+
+    validateLoginForm(credentials) {
+        const errors = [];
+        
+        if (!credentials.email) {
+            errors.push('Email é obrigatório');
+        } else if (!this.isValidEmail(credentials.email)) {
+            errors.push('Email inválido');
+        }
+        
+        if (!credentials.password) {
+            errors.push('Senha é obrigatória');
+        }
+        
+        if (errors.length > 0) {
+            this.showNotification(errors.join(', '), 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
+    validateSignupForm(userData) {
+        const errors = [];
+        
+        if (!userData.name?.trim()) {
+            errors.push('Nome é obrigatório');
+        }
+        
+        if (!userData.email) {
+            errors.push('Email é obrigatório');
+        } else if (!this.isValidEmail(userData.email)) {
+            errors.push('Email inválido');
+        }
+        
+        if (!userData.password) {
+            errors.push('Senha é obrigatória');
+        } else if (userData.password.length < 6) {
+            errors.push('Senha deve ter pelo menos 6 caracteres');
+        }
+        
+        if (userData.password !== userData.confirmPassword) {
+            errors.push('Senhas não coincidem');
+        }
+        
+        if (errors.length > 0) {
+            this.showNotification(errors.join(', '), 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    checkAuthStatus() {
+        const token = localStorage.getItem('authToken');
+        const user = localStorage.getItem('user');
+        
+        if (token && user) {
+            try {
+                this.currentUser = JSON.parse(user);
+                this.updateAuthUI();
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                this.handleLogout();
+            }
+        }
+    }
+
+    updateAuthUI() {
+        const authButtons = document.getElementById('authButtons');
+        const userMenu = document.getElementById('userMenu');
+        const userAvatar = document.getElementById('userAvatar');
+        const isAuth = this.isAuthenticated();
+        
+        if (isAuth) {
+            // Hide auth buttons
+            if (authButtons) {
+                authButtons.classList.add('hidden');
+            }
+            
+            // Show user menu
+            if (userMenu) {
+                userMenu.classList.remove('hidden');
+            }
+            
+            // Update user avatar and info
+            this.updateUserInfo();
+            
+        } else {
+            // Show auth buttons
+            if (authButtons) {
+                authButtons.classList.remove('hidden');
+            }
+            
+            // Hide user menu
+            if (userMenu) {
+                userMenu.classList.add('hidden');
+            }
+        }
+    }
+
+    updateUserInfo() {
+        const user = apiService.getCurrentUser();
+        if (!user) return;
+
+        // Update avatar in header
+        const userAvatar = document.querySelector('#userMenu .user-avatar img');
+        if (userAvatar && user.avatar) {
+            userAvatar.src = user.avatar;
+        }
+
+        // Update profile modal if open
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileAvatar = document.getElementById('profileAvatar');
+
+        if (profileName) profileName.textContent = user.name || user.email;
+        if (profileEmail) profileEmail.textContent = user.email;
+        if (profileAvatar && user.avatar) {
+            profileAvatar.src = user.avatar;
+        }
+    }
+
+    isAuthenticated() {
+        return apiService.isAuthenticated();
+    }
+
+    // Modal control methods
+    showLoginModal() {
+        if (this.loginModal) {
+            this.loginModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Focus on first input
+            setTimeout(() => {
+                const firstInput = this.loginModal.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+    }
+
+    hideLoginModal() {
+        if (this.loginModal) {
+            this.hideModal(this.loginModal);
+        }
+    }
+
+    showSignupModal() {
+        if (this.signupModal) {
+            this.signupModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Focus on first input
+            setTimeout(() => {
+                const firstInput = this.signupModal.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+    }
+
+    hideSignupModal() {
+        if (this.signupModal) {
+            this.hideModal(this.signupModal);
+        }
+    }
+
+    hideModal(modal) {
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    setButtonLoading(button, loading) {
+        if (!button) return;
+        
+        if (loading) {
+            button.classList.add('btn-loading');
+            button.disabled = true;
+        } else {
+            button.classList.remove('btn-loading');
+            button.disabled = false;
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+
+        // Create notification
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const icon = type === 'success' ? 'fas fa-check-circle' : 
+                    type === 'error' ? 'fas fa-exclamation-circle' : 
+                    type === 'warning' ? 'fas fa-exclamation-triangle' : 
+                    'fas fa-info-circle';
+
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="${icon}"></i>
+                </div>
+                <div class="notification-text">
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Show notification
+        setTimeout(() => notification.classList.add('show'), 100);
+
+        // Auto hide after 5 seconds
+        const autoHideTimeout = setTimeout(() => {
+            this.hideNotification(notification);
+        }, 5000);
+
+        // Manual close
+        const closeBtn = notification.querySelector('.notification-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(autoHideTimeout);
+                this.hideNotification(notification);
+            });
+        }
+    }
+
+    hideNotification(notification) {
+        if (notification) {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
+}
+
+// Initialize auth manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.authManager = new AuthManager();
 });

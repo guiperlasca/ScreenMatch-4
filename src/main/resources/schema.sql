@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     login VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
+    nome VARCHAR(255),
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -84,6 +85,15 @@ CREATE TABLE IF NOT EXISTS favoritos (
     usuario_id BIGINT NOT NULL,
     serie_id BIGINT NOT NULL,
     data_adicao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (usuario_id, serie_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (serie_id) REFERENCES series(id)
+);
+
+-- Tabela de relacionamento para favoritos (JPA)
+CREATE TABLE IF NOT EXISTS usuario_serie_favorita (
+    usuario_id BIGINT NOT NULL,
+    serie_id BIGINT NOT NULL,
     PRIMARY KEY (usuario_id, serie_id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (serie_id) REFERENCES series(id)

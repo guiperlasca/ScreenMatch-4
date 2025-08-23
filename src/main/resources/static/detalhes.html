@@ -3,42 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Filme - CineVault</title>
+    <title>Detalhes do Filme - ScreenMatch</title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/detalhes.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-<div class="min-h-screen bg-background">
     <!-- Header -->
-    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
-                <a href="/" class="flex items-center space-x-2">
-                    <img src="img/placeholder-logo.svg" alt="CineVault Logo" class="h-8 w-8">
-                    <span class="text-2xl font-bold text-foreground">CineVault</span>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-film"></i>
+                    <span>ScreenMatch</span>
                 </a>
+                
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Início</a>
+                    <a href="#" class="nav-link">Filmes</a>
+                    <a href="#" class="nav-link">Listas</a>
+                    <a href="#" class="nav-link">Reviews</a>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="Buscar filmes..." class="search-input" id="headerSearch">
+                        <div class="search-dropdown" id="searchDropdown"></div>
+                    </div>
+                    
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="btn-secondary" id="loginBtn">Entrar</button>
+                        <button class="btn-primary" id="signupBtn">Cadastrar</button>
+                    </div>
+                    
+                    <div class="user-menu hidden" id="userMenu">
+                        <div class="user-avatar" id="userAvatar">
+                            <img src="placeholder-user.jpg" alt="Avatar">
+                        </div>
+                        <div class="user-dropdown">
+                            <a href="#" id="profileLink">Meu Perfil</a>
+                            <a href="#" id="myListsLink">Minhas Listas</a>
+                            <a href="#" id="favoritesLink">Favoritos</a>
+                            <hr>
+                            <a href="#" id="logoutBtn">Sair</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div id="movieDetails">
-            <!-- Movie details will be loaded here -->
+    <main class="movie-details-page">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="container">
+                <div class="loading-content">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando detalhes do filme...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movie Details -->
+        <div id="movieDetailsContent" class="hidden">
+            <!-- Hero Section -->
+            <section class="movie-hero" id="movieHero">
+                <!-- Content will be loaded dynamically -->
+            </section>
+
+            <!-- Main Content -->
+            <section class="movie-content">
+                <div class="container">
+                    <div class="content-grid">
+                        <!-- Main Column -->
+                        <div class="main-column">
+                            <!-- Overview -->
+                            <div class="content-section">
+                                <h2>Sinopse</h2>
+                                <p id="movieOverview" class="overview-text"></p>
+                            </div>
+
+                            <!-- Cast -->
+                            <div class="content-section" id="castSection">
+                                <h2>Elenco Principal</h2>
+                                <div class="cast-grid" id="castGrid">
+                                    <!-- Cast will be loaded here -->
+                                </div>
+                            </div>
+
+                            <!-- Comments Section -->
+                            <div class="content-section">
+                                <div class="section-header">
+                                    <h2>Comentários da Comunidade</h2>
+                                    <button class="btn-primary" id="addCommentBtn">
+                                        <i class="fas fa-plus"></i>
+                                        Adicionar Comentário
+                                    </button>
+                                </div>
+
+                                <!-- Add Comment Form -->
+                                <div class="comment-form hidden" id="commentForm">
+                                    <div class="user-comment-input">
+                                        <div class="user-avatar">
+                                            <img src="placeholder-user.jpg" alt="Avatar" id="commentUserAvatar">
+                                        </div>
+                                        <div class="comment-input-container">
+                                            <textarea placeholder="Compartilhe sua opinião sobre este filme..." 
+                                                      id="commentText" rows="3"></textarea>
+                                            <div class="comment-actions">
+                                                <div class="rating-input">
+                                                    <span>Sua nota:</span>
+                                                    <div class="star-rating" id="commentRating">
+                                                        <button class="star-btn" data-rating="1"><i class="fas fa-star"></i></button>
+                                                        <button class="star-btn" data-rating="2"><i class="fas fa-star"></i></button>
+                                                        <button class="star-btn" data-rating="3"><i class="fas fa-star"></i></button>
+                                                        <button class="star-btn" data-rating="4"><i class="fas fa-star"></i></button>
+                                                        <button class="star-btn" data-rating="5"><i class="fas fa-star"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="comment-buttons">
+                                                    <button class="btn-secondary" id="cancelCommentBtn">Cancelar</button>
+                                                    <button class="btn-primary" id="submitCommentBtn">Publicar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Comments List -->
+                                <div class="comments-list" id="commentsList">
+                                    <!-- Comments will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="sidebar">
+                            <!-- Movie Info -->
+                            <div class="info-card">
+                                <h3>Informações</h3>
+                                <div class="info-item">
+                                    <span class="label">Lançamento:</span>
+                                    <span class="value" id="releaseDate">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Duração:</span>
+                                    <span class="value" id="runtime">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Gêneros:</span>
+                                    <span class="value" id="genres">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Direção:</span>
+                                    <span class="value" id="director">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Orçamento:</span>
+                                    <span class="value" id="budget">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Bilheteria:</span>
+                                    <span class="value" id="revenue">-</span>
+                                </div>
+                            </div>
+
+                            <!-- User Actions -->
+                            <div class="actions-card">
+                                <h3>Suas Ações</h3>
+                                <div class="action-buttons">
+                                    <button class="action-button" id="favoriteBtn">
+                                        <i class="fas fa-heart"></i>
+                                        <span>Favoritar</span>
+                                    </button>
+                                    <button class="action-button" id="watchlistBtn">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Assistir Depois</span>
+                                    </button>
+                                    <button class="action-button" id="addToListBtn">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Adicionar à Lista</span>
+                                    </button>
+                                    <button class="action-button" id="shareBtn">
+                                        <i class="fas fa-share"></i>
+                                        <span>Compartilhar</span>
+                                    </button>
+                                </div>
+            </div>
+            
+                            <!-- Statistics -->
+                            <div class="stats-card">
+                                <h3>Estatísticas</h3>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="voteAverage">-</span>
+                                    <span class="stat-label">Avaliação</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="voteCount">-</span>
+                                    <span class="stat-label">Votos</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="popularity">-</span>
+                                    <span class="stat-label">Popularidade</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-muted border-t border-border">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="text-center">
-                <p class="text-muted-foreground">© 2024 CineVault. Todos os direitos reservados.</p>
+    <!-- Modals (same as index.html) -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Entrar no ScreenMatch</h2>
+                <button class="modal-close" id="closeLoginModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember">
+                        <span>Lembrar de mim</span>
+                    </label>
+                    <a href="#" class="forgot-password">Esqueci a senha</a>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full">Entrar</button>
+            </form>
+            
+            <div class="auth-switch">
+                <p>Não tem uma conta? <a href="#" id="switchToSignup">Cadastre-se</a></p>
             </div>
         </div>
-    </footer>
 </div>
 
+    <div class="modal" id="signupModal">
+    <div class="modal-content">
+            <div class="modal-header">
+                <h2>Criar Conta</h2>
+                <button class="modal-close" id="closeSignupModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="auth-form" id="signupForm">
+                <div class="form-group">
+                    <label for="signupName">Nome</label>
+                    <input type="text" id="signupName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupPassword">Senha</label>
+                    <input type="password" id="signupPassword" name="password" required>
+                </div>
+                
+            <div class="form-group">
+                    <label for="signupConfirmPassword">Confirmar Senha</label>
+                    <input type="password" id="signupConfirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="terms" required>
+                        <span>Aceito os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a></span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full">Criar Conta</button>
+            </form>
+            
+            <div class="auth-switch">
+                <p>Já tem uma conta? <a href="#" id="switchToLogin">Entre aqui</a></p>
+            </div>
+        </div>
+</div>
+
+    <!-- Profile Modal (same as index.html) -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Meu Perfil</h2>
+                <button class="modal-close" id="closeProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="profile-content">
+                <div class="profile-sidebar">
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar">
+                            <img src="placeholder-user.jpg" alt="Avatar" id="profileAvatar">
+                            <button class="avatar-upload-btn" id="avatarUploadBtn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" accept="image/*" style="display: none;" id="avatarInput">
+                        </div>
+                        <h3 id="profileName">Usuário</h3>
+                        <p id="profileEmail">usuario@email.com</p>
+                    </div>
+                    
+                    <nav class="profile-nav">
+                        <a href="#" class="profile-nav-item active" data-tab="info">Informações</a>
+                        <a href="#" class="profile-nav-item" data-tab="lists">Minhas Listas</a>
+                        <a href="#" class="profile-nav-item" data-tab="reviews">Minhas Reviews</a>
+                        <a href="#" class="profile-nav-item" data-tab="favorites">Favoritos</a>
+                        <a href="#" class="profile-nav-item" data-tab="settings">Configurações</a>
+                    </nav>
+                </div>
+                
+                <div class="profile-main">
+                    <div class="profile-tab active" id="tab-info">
+                        <h3>Informações Pessoais</h3>
+                        <form class="profile-form">
+                            <div class="form-group">
+                                <label for="editName">Nome</label>
+                                <input type="text" id="editName" name="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="editEmail">Email</label>
+                                <input type="email" id="editEmail" name="email">
+            </div>
+            <div class="form-group">
+                                <label for="editBio">Bio</label>
+                                <textarea id="editBio" name="bio" rows="3" placeholder="Conte um pouco sobre você..."></textarea>
+            </div>
+                            <button type="submit" class="btn-primary">Salvar Alterações</button>
+        </form>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-lists">
+                        <h3>Minhas Listas</h3>
+                        <div id="userLists"></div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-reviews">
+                        <h3>Minhas Reviews</h3>
+                        <div id="userReviews"></div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-favorites">
+                        <h3>Meus Favoritos</h3>
+                        <div id="userFavorites"></div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-settings">
+                        <h3>Configurações</h3>
+                        <div class="settings-section">
+                            <h4>Privacidade</h4>
+                            <label class="toggle">
+                                <input type="checkbox" id="publicProfile">
+                                <span>Perfil público</span>
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" id="showActivity">
+                                <span>Mostrar atividade</span>
+                            </label>
+    </div>
+                        
+                        <div class="settings-section">
+                            <h4>Notificações</h4>
+                            <label class="toggle">
+                                <input type="checkbox" id="emailNotifications">
+                                <span>Notificações por email</span>
+                            </label>
+</div>
+
+                        <div class="settings-section">
+                            <h4>Conta</h4>
+                            <button class="btn-secondary">Alterar Senha</button>
+                            <button class="btn-danger">Excluir Conta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+
+    <!-- Scripts -->
 <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
 <script src="js/detalhes.js"></script>
 </body>
 </html>

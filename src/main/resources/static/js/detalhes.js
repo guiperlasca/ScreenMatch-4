@@ -1,293 +1,664 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const movieDetailsContainer = document.getElementById('movieDetails');
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const movieId = urlParams.get('id');
-
-    if (!movieId) {
-        if (movieDetailsContainer) {
-            movieDetailsContainer.innerHTML = '<p class="text-red-500">Movie ID not found in URL.</p>';
-        }
-        return;
+// Movie Details Page Logic
+class MovieDetailsPage {
+    constructor() {
+        this.movieId = null;
+        this.movie = null;
+        this.currentRating = 0;
+        this.comments = [];
+        this.init();
     }
 
-    async function loadMovieDetails() {
+    init() {
+        this.getMovieIdFromUrl();
+        if (this.movieId) {
+            this.loadMovieDetails();
+        } else {
+            this.showError('ID do filme não encontrado na URL');
+        }
+        
+        this.setupEventListeners();
+    }
+
+    getMovieIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+        this.movieId = urlParams.get('id');
+    }
+
+    setupEventListeners() {
+        // Action buttons in sidebar
+        const favoriteBtn = document.getElementById('favoriteBtn');
+        const watchlistBtn = document.getElementById('watchlistBtn');
+        const addToListBtn = document.getElementById('addToListBtn');
+        const shareBtn = document.getElementById('shareBtn');
+
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', () => this.toggleFavorite());
+        }
+        
+        if (watchlistBtn) {
+            watchlistBtn.addEventListener('click', () => this.toggleWatchlist());
+        }
+        
+        if (addToListBtn) {
+            addToListBtn.addEventListener('click', () => this.showAddToListModal());
+        }
+        
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => this.shareMovie());
+        }
+
+        // Comment system
+        const addCommentBtn = document.getElementById('addCommentBtn');
+        const cancelCommentBtn = document.getElementById('cancelCommentBtn');
+        const submitCommentBtn = document.getElementById('submitCommentBtn');
+        const commentForm = document.getElementById('commentForm');
+
+        if (addCommentBtn) {
+            addCommentBtn.addEventListener('click', () => this.showCommentForm());
+        }
+        
+        if (cancelCommentBtn) {
+            cancelCommentBtn.addEventListener('click', () => this.hideCommentForm());
+        }
+        
+        if (submitCommentBtn) {
+            submitCommentBtn.addEventListener('click', () => this.submitComment());
+        }
+
+        // Star rating for comments
+        const starBtns = document.querySelectorAll('#commentRating .star-btn');
+        starBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.setRating(parseInt(btn.dataset.rating)));
+            btn.addEventListener('mouseenter', () => this.previewRating(parseInt(btn.dataset.rating)));
+        });
+
+        const starRating = document.getElementById('commentRating');
+        if (starRating) {
+            starRating.addEventListener('mouseleave', () => this.resetRatingPreview());
+        }
+
+        // Header search (if present)
+        const headerSearch = document.getElementById('headerSearch');
+        if (headerSearch) {
+            headerSearch.addEventListener('input', (e) => this.handleHeaderSearch(e));
+        }
+    }
+
+    async loadMovieDetails() {
+        const loadingState = document.getElementById('loadingState');
+        const detailsContent = document.getElementById('movieDetailsContent');
+
         try {
-            const response = await fetch(`${API_BASE_URL}/series/${movieId}`);
-            if (!response.ok) {
-                throw new Error('Failed to load movie details.');
-            }
-            const movie = await response.json();
-            renderMovieDetails(movie);
-            loadReviews(); // Load reviews after rendering movie details
+            if (loadingState) loadingState.style.display = 'block';
+            if (detailsContent) detailsContent.classList.add('hidden');
+
+            // Load movie details from TMDB
+            this.movie = await apiService.getMovieDetails(this.movieId);
+            
+            // Update page title
+            document.title = `${this.movie.title} - ScreenMatch`;
+            
+            // Render movie details
+            this.renderMovieHero();
+            this.renderMovieInfo();
+            this.renderCast();
+            
+            // Load comments
+            await this.loadComments();
+            
+            if (loadingState) loadingState.style.display = 'none';
+            if (detailsContent) detailsContent.classList.remove('hidden');
+
         } catch (error) {
             console.error('Error loading movie details:', error);
-            if (movieDetailsContainer) {
-                movieDetailsContainer.innerHTML = '<p class="text-red-500">Could not load movie details.</p>';
-            }
+            this.showError('Erro ao carregar detalhes do filme');
         }
     }
 
-    function renderMovieDetails(movie) {
-        if (!movieDetailsContainer) return;
-        document.title = `${movie.titulo} - CineVault`;
-        movieDetailsContainer.innerHTML = `
-            <div class="poster-container">
-                <img src="${movie.poster || 'img/placeholder.jpg'}" alt="Poster for ${movie.titulo}" class="poster-img">
+    renderMovieHero() {
+        const heroSection = document.getElementById('movieHero');
+        if (!heroSection || !this.movie) return;
+
+        const backdropUrl = this.movie.backdropPath || this.movie.posterPath;
+        const genres = this.movie.genres?.map(g => g.name).join(', ') || 'N/A';
+        const director = this.movie.director?.name || 'N/A';
+        const runtime = apiService.formatRuntime(this.movie.runtime);
+
+        heroSection.innerHTML = `
+            <div class="hero-backdrop">
+                ${backdropUrl ? `<img src="${backdropUrl}" alt="${this.movie.title}">` : ''}
             </div>
-            <div class="info-container">
-                <div class="flex justify-between items-start">
-                    <h1 class="text-4xl font-bold text-foreground">${movie.titulo}</h1>
-                    <button id="favoriteBtn" class="text-3xl text-gray-500 hover:text-red-500 transition-colors">❤</button>
+            
+            <div class="hero-content">
+                <div class="container">
+                    <div class="hero-main">
+                        <div class="hero-poster">
+                            <img src="${this.movie.posterPath || 'placeholder.jpg'}" 
+                                 alt="${this.movie.title}"
+                                 onerror="this.src='placeholder.jpg'">
                 </div>
-                <div class="meta-info">
-                    <span>${movie.ano}</span>
-                    <span>${movie.genero}</span>
-                    <span class="imdb-rating">IMDb: ${movie.avaliacao || 'N/A'}</span>
+                        
+                        <div class="hero-info">
+                            <h1 class="movie-title">${this.movie.title}</h1>
+                            ${this.movie.tagline ? `<p class="movie-tagline">"${this.movie.tagline}"</p>` : ''}
+                            
+                            <div class="movie-meta">
+                                ${this.movie.voteAverage ? `
+                                    <div class="meta-item rating-badge">
+                                        <i class="fas fa-star"></i>
+                                        ${this.movie.voteAverage.toFixed(1)}
                 </div>
-                <p class="plot">${movie.sinopse}</p>
-                
-                <div class="add-to-list-widget mt-6">
-                     <button id="addToListBtn" class="btn btn-primary">Adicionar à minha lista (+)</button>
-                     <p class="list-feedback hidden mt-2"></p>
+                                ` : ''}
+                                
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    ${this.movie.year || 'N/A'}
                 </div>
 
-                <div class="reviews-section mt-8">
-                    <h3 class="text-2xl font-semibold mb-4">Avaliações dos Usuários</h3>
-                    <div id="reviewsContainer"></div>
+                                ${runtime !== 'N/A' ? `
+                                    <div class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        ${runtime}
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="meta-item">
+                                    <i class="fas fa-film"></i>
+                                    ${director}
+                                </div>
                 </div>
 
-                <div class="rating-widget mt-6">
-                    <h3 class="text-lg font-semibold mb-2">Deixe sua avaliação:</h3>
-                    <div class="stars" data-movie-id="${movie.id}">
-                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<span class="star" data-value="${i}">&#9734;</span>`).join('')}
+                            <div class="hero-actions">
+                                <button class="hero-action-btn primary" id="heroFavoriteBtn">
+                                    <i class="fas fa-heart"></i>
+                                    Favoritar
+                                </button>
+                                <button class="hero-action-btn" id="heroWatchlistBtn">
+                                    <i class="fas fa-clock"></i>
+                                    Assistir Depois
+                                </button>
+                                <button class="hero-action-btn" id="heroRateBtn">
+                                    <i class="fas fa-star"></i>
+                                    Avaliar
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <textarea id="reviewComment" class="input mt-2" placeholder="Escreva seu comentário..."></textarea>
-                    <button id="submitReviewBtn" class="btn btn-primary mt-2">Enviar Avaliação</button>
-                    <p class="rating-feedback hidden mt-2"></p>
                 </div>
             </div>
         `;
-        addFavoriteFunctionality();
-        addToListFunctionality();
-        addRatingFunctionality(); // Renamed from submitReview to addRatingFunctionality
-    }
 
-    async function loadReviews() {
-        const reviewsContainer = document.getElementById('reviewsContainer');
-        if (!reviewsContainer) return;
+        // Add event listeners to hero buttons
+        const heroFavoriteBtn = document.getElementById('heroFavoriteBtn');
+        const heroWatchlistBtn = document.getElementById('heroWatchlistBtn');
+        const heroRateBtn = document.getElementById('heroRateBtn');
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/avaliacoes/series/${movieId}`);
-            if (!response.ok) throw new Error('Failed to load reviews.');
-
-            const reviews = await response.json();
-            renderReviews(reviews.content, reviewsContainer);
-        } catch (error) {
-            console.error('Error loading reviews:', error);
-            reviewsContainer.innerHTML = '<p class="text-red-500">Could not load reviews.</p>';
+        if (heroFavoriteBtn) {
+            heroFavoriteBtn.addEventListener('click', () => this.toggleFavorite());
+        }
+        
+        if (heroWatchlistBtn) {
+            heroWatchlistBtn.addEventListener('click', () => this.toggleWatchlist());
+        }
+        
+        if (heroRateBtn) {
+            heroRateBtn.addEventListener('click', () => this.showCommentForm());
         }
     }
 
-    function renderReviews(reviews, container) {
-        container.innerHTML = '';
-        if (reviews.length === 0) {
-            container.innerHTML = '<p>Ainda não há avaliações para este filme.</p>';
+    renderMovieInfo() {
+        if (!this.movie) return;
+
+        // Overview
+        const overviewElement = document.getElementById('movieOverview');
+        if (overviewElement) {
+            overviewElement.textContent = this.movie.overview || 'Sinopse não disponível.';
+        }
+
+        // Sidebar info
+        const elements = {
+            releaseDate: this.movie.releaseDate ? new Date(this.movie.releaseDate).toLocaleDateString('pt-BR') : 'N/A',
+            runtime: apiService.formatRuntime(this.movie.runtime),
+            genres: this.movie.genres?.map(g => g.name).join(', ') || 'N/A',
+            director: this.movie.director?.name || 'N/A',
+            budget: apiService.formatCurrency(this.movie.budget),
+            revenue: apiService.formatCurrency(this.movie.revenue),
+            voteAverage: this.movie.voteAverage ? this.movie.voteAverage.toFixed(1) : 'N/A',
+            voteCount: this.movie.voteCount?.toLocaleString('pt-BR') || 'N/A',
+            popularity: this.movie.popularity ? Math.round(this.movie.popularity) : 'N/A'
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+    }
+
+    renderCast() {
+        const castGrid = document.getElementById('castGrid');
+        const castSection = document.getElementById('castSection');
+        
+        if (!castGrid || !this.movie?.cast) return;
+
+        if (this.movie.cast.length === 0) {
+            castSection.style.display = 'none';
             return;
         }
-        reviews.forEach(review => {
-            const reviewEl = document.createElement('div');
-            reviewEl.className = 'review-card border-b border-border pb-4 mb-4';
-            reviewEl.innerHTML = `
-                <div class="flex items-center mb-2">
-                    <strong class="mr-2">${review.autor}</strong>
-                    <span class="text-yellow-500">${'★'.repeat(review.pontuacao)}${'☆'.repeat(10 - review.pontuacao)}</span>
+
+        const mainCast = this.movie.cast.slice(0, 12);
+        castGrid.innerHTML = mainCast.map(actor => `
+            <div class="cast-member">
+                <div class="cast-photo">
+                    ${actor.profile_path ? `
+                        <img src="${CONFIG.TMDB_IMAGE_BASE_URL}/w200${actor.profile_path}" 
+                             alt="${actor.name}"
+                             onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;background:var(--bg-tertiary);color:var(--text-muted);\\'>Sem foto</div>'">
+                    ` : `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;background:var(--bg-tertiary);color:var(--text-muted);">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    `}
                 </div>
-                <p>${review.comentario}</p>
-                <p class="text-xs text-muted-foreground mt-1">${new Date(review.data).toLocaleDateString()}</p>
+                <div class="cast-name">${actor.name}</div>
+                <div class="cast-character">${actor.character || 'N/A'}</div>
+            </div>
+        `).join('');
+    }
+
+    async loadComments() {
+        const commentsList = document.getElementById('commentsList');
+        if (!commentsList) return;
+
+        try {
+            // Try to load from backend first
+            let comments = [];
+            try {
+                const backendComments = await apiService.getMovieReviews(this.movieId);
+                comments = backendComments.content || backendComments || [];
+            } catch (error) {
+                console.log('Backend comments not available, using local storage');
+            }
+
+            // Load from local storage as well
+            const localComments = this.getLocalComments();
+            comments = [...comments, ...localComments];
+
+            // Load TMDB reviews as additional context
+            if (this.movie.tmdbReviews?.length > 0) {
+                const tmdbComments = this.movie.tmdbReviews.map(review => ({
+                    id: `tmdb_${review.id}`,
+                    author: review.author,
+                    content: review.content.slice(0, 500) + (review.content.length > 500 ? '...' : ''),
+                    rating: Math.ceil(review.author_details?.rating / 2) || 5, // Convert 10-scale to 5-scale
+                    createdAt: review.created_at,
+                    source: 'TMDB'
+                }));
+                comments = [...comments, ...tmdbComments];
+            }
+
+            this.comments = comments;
+            this.renderComments();
+
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            commentsList.innerHTML = '<div class="error-state"><p>Erro ao carregar comentários</p></div>';
+        }
+    }
+
+    renderComments() {
+        const commentsList = document.getElementById('commentsList');
+        if (!commentsList) return;
+
+        if (this.comments.length === 0) {
+            commentsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-comments"></i>
+                    <h4>Nenhum comentário ainda</h4>
+                    <p>Seja o primeiro a comentar sobre este filme!</p>
+                </div>
             `;
-            container.appendChild(reviewEl);
+            return;
+        }
+
+        // Sort comments by date (newest first)
+        const sortedComments = [...this.comments].sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.data || Date.now());
+            const dateB = new Date(b.createdAt || b.data || Date.now());
+            return dateB - dateA;
+        });
+
+        commentsList.innerHTML = sortedComments.map(comment => this.createCommentHTML(comment)).join('');
+    }
+
+    createCommentHTML(comment) {
+        const rating = comment.rating || comment.pontuacao || 0;
+        const author = comment.author || comment.autor || 'Usuário Anônimo';
+        const content = comment.content || comment.comentario || '';
+        const date = new Date(comment.createdAt || comment.data || Date.now());
+        const isFromTMDB = comment.source === 'TMDB';
+
+        return `
+            <div class="comment-item">
+                <div class="comment-header">
+                    <div class="user-avatar">
+                        <img src="placeholder-user.jpg" alt="${author}">
+                    </div>
+                    <div class="comment-author">${author}</div>
+                    ${isFromTMDB ? '<span class="comment-source">TMDB</span>' : ''}
+                    <div class="comment-rating">
+                        ${'<i class="fas fa-star"></i>'.repeat(rating)}
+                        ${'<i class="far fa-star"></i>'.repeat(Math.max(0, 5 - rating))}
+                    </div>
+                    <div class="comment-date">${date.toLocaleDateString('pt-BR')}</div>
+                </div>
+                <div class="comment-text">${content}</div>
+                ${!isFromTMDB ? `
+                    <div class="comment-actions">
+                        <button class="comment-action">
+                            <i class="fas fa-thumbs-up"></i>
+                            Útil
+                        </button>
+                        <button class="comment-action">
+                            <i class="fas fa-reply"></i>
+                            Responder
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    showCommentForm() {
+        if (!authManager.isAuthenticated()) {
+            authManager.showLoginModal();
+            return;
+        }
+
+        const commentForm = document.getElementById('commentForm');
+        const addCommentBtn = document.getElementById('addCommentBtn');
+        
+        if (commentForm) {
+            commentForm.classList.remove('hidden');
+        }
+        
+        if (addCommentBtn) {
+            addCommentBtn.style.display = 'none';
+        }
+
+        // Update user avatar in comment form
+        const user = apiService.getCurrentUser();
+        const commentUserAvatar = document.getElementById('commentUserAvatar');
+        if (commentUserAvatar && user?.avatar) {
+            commentUserAvatar.src = user.avatar;
+        }
+
+        // Focus on textarea
+        const textarea = document.getElementById('commentText');
+        if (textarea) {
+            textarea.focus();
+        }
+    }
+
+    hideCommentForm() {
+        const commentForm = document.getElementById('commentForm');
+        const addCommentBtn = document.getElementById('addCommentBtn');
+        
+        if (commentForm) {
+            commentForm.classList.add('hidden');
+        }
+        
+        if (addCommentBtn) {
+            addCommentBtn.style.display = 'block';
+        }
+
+        // Reset form
+        this.resetCommentForm();
+    }
+
+    resetCommentForm() {
+        const textarea = document.getElementById('commentText');
+        if (textarea) {
+            textarea.value = '';
+        }
+
+        this.currentRating = 0;
+        this.updateStarRating();
+    }
+
+    setRating(rating) {
+        this.currentRating = rating;
+        this.updateStarRating();
+    }
+
+    previewRating(rating) {
+        const starBtns = document.querySelectorAll('#commentRating .star-btn');
+        starBtns.forEach((btn, index) => {
+            btn.classList.toggle('active', index < rating);
         });
     }
 
-    function addRatingFunctionality() {
-        const submitBtn = document.getElementById('submitReviewBtn');
-        const starsContainer = document.querySelector('.stars');
-        const commentArea = document.getElementById('reviewComment');
-        const feedbackP = document.querySelector('.rating-feedback');
-        let currentRating = 0;
+    resetRatingPreview() {
+        this.updateStarRating();
+    }
 
-        if (!submitBtn || !starsContainer || !commentArea) return;
-
-        starsContainer.addEventListener('click', e => {
-            if (e.target.classList.contains('star')) {
-                currentRating = parseInt(e.target.dataset.value);
-                // Visual feedback for selected stars
-                Array.from(starsContainer.children).forEach((star, index) => {
-                    star.innerHTML = index < currentRating ? '★' : '☆';
-                });
-            }
+    updateStarRating() {
+        const starBtns = document.querySelectorAll('#commentRating .star-btn');
+        starBtns.forEach((btn, index) => {
+            btn.classList.toggle('active', index < this.currentRating);
         });
+    }
 
-        submitBtn.addEventListener('click', async () => {
-            const token = localStorage.getItem('authToken');
-            const comment = commentArea.value;
+    async submitComment() {
+        const textarea = document.getElementById('commentText');
+        const submitBtn = document.getElementById('submitCommentBtn');
+        
+        if (!textarea || !submitBtn) return;
 
-            if (!token) {
-                feedbackP.textContent = 'Você precisa estar logado para avaliar.';
-                feedbackP.className = 'rating-feedback mt-2 text-red-500';
-                feedbackP.classList.remove('hidden');
+        const commentText = textarea.value.trim();
+        
+        if (!commentText) {
+            authManager.showNotification('Digite um comentário', 'warning');
                 return;
             }
-            if (currentRating === 0) {
-                feedbackP.textContent = 'Por favor, selecione uma nota.';
-                feedbackP.className = 'rating-feedback mt-2 text-red-500';
-                feedbackP.classList.remove('hidden');
+
+        if (this.currentRating === 0) {
+            authManager.showNotification('Selecione uma nota', 'warning');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/avaliacoes/series/${movieId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ pontuacao: currentRating, comentario: comment })
+            authManager.setButtonLoading(submitBtn, true);
+
+            const user = apiService.getCurrentUser();
+            const newComment = {
+                id: Date.now().toString(),
+                author: user?.name || user?.email || 'Usuário',
+                content: commentText,
+                rating: this.currentRating,
+                createdAt: new Date().toISOString(),
+                movieId: this.movieId
+            };
+
+            // Try to save to backend
+            try {
+                await apiService.addReview(this.movieId, {
+                    pontuacao: this.currentRating,
+                    comentario: commentText
                 });
-
-                if (!response.ok) throw new Error('Falha ao enviar avaliação.');
-
-                feedbackP.textContent = 'Avaliação enviada com sucesso!';
-                feedbackP.className = 'rating-feedback mt-2 text-green-500';
-                feedbackP.classList.remove('hidden');
-                commentArea.value = '';
-                currentRating = 0;
-                Array.from(starsContainer.children).forEach(star => star.innerHTML = '☆');
-                loadReviews(); // Refresh reviews
             } catch (error) {
-                console.error('Error submitting review:', error);
-                feedbackP.textContent = 'Falha ao enviar avaliação. Tente novamente.';
-                feedbackP.className = 'rating-feedback mt-2 text-red-500';
-                feedbackP.classList.remove('hidden');
+                console.log('Backend save failed, saving locally');
+                this.saveLocalComment(newComment);
             }
-        });
+
+            // Add to comments list
+            this.comments.unshift(newComment);
+            this.renderComments();
+
+            // Hide form and show success
+            this.hideCommentForm();
+            authManager.showNotification('Comentário adicionado com sucesso!', 'success');
+
+        } catch (error) {
+            console.error('Error submitting comment:', error);
+            authManager.showNotification('Erro ao adicionar comentário', 'error');
+        } finally {
+            authManager.setButtonLoading(submitBtn, false);
+        }
     }
 
-    function addFavoriteFunctionality() {
-        const favoriteBtn = document.getElementById('favoriteBtn');
-        if (!favoriteBtn) return;
+    saveLocalComment(comment) {
+        const localComments = this.getLocalComments();
+        localComments.unshift(comment);
+        localStorage.setItem(`comments_${this.movieId}`, JSON.stringify(localComments));
+    }
 
-        favoriteBtn.addEventListener('click', async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('Você precisa estar logado para favoritar filmes.');
+    getLocalComments() {
+        try {
+            return JSON.parse(localStorage.getItem(`comments_${this.movieId}`) || '[]');
+        } catch {
+            return [];
+        }
+    }
+
+    async toggleFavorite() {
+        if (!authManager.isAuthenticated()) {
+            authManager.showLoginModal();
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/series/${movieId}/favorito`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            // Update UI optimistically
+            const favoriteBtns = document.querySelectorAll('#favoriteBtn, #heroFavoriteBtn');
+            favoriteBtns.forEach(btn => {
+                btn.classList.toggle('favorited');
+                btn.classList.toggle('active');
+            });
 
-                if (!response.ok) throw new Error('Falha ao favoritar.');
-
-                // Toggle button appearance
-                favoriteBtn.classList.toggle('text-red-500');
-                favoriteBtn.classList.toggle('text-gray-500');
+            await apiService.toggleFavorite(this.movieId);
+            
+            const isFavorited = document.getElementById('favoriteBtn')?.classList.contains('favorited');
+            const message = isFavorited ? 'Adicionado aos favoritos' : 'Removido dos favoritos';
+            authManager.showNotification(message, 'success');
 
             } catch (error) {
-                console.error('Error favoriting:', error);
-                alert('Ocorreu um erro ao favoritar o filme.');
-            }
-        });
+            console.error('Error toggling favorite:', error);
+            authManager.showNotification('Erro ao favoritar filme', 'error');
+            
+            // Revert UI on error
+            const favoriteBtns = document.querySelectorAll('#favoriteBtn, #heroFavoriteBtn');
+            favoriteBtns.forEach(btn => {
+                btn.classList.toggle('favorited');
+                btn.classList.toggle('active');
+            });
+        }
     }
 
-    function addToListFunctionality() {
-        const addToListBtn = document.getElementById('addToListBtn');
-        const feedbackP = document.querySelector('.list-feedback');
-        if (!addToListBtn) return;
-
-        addToListBtn.addEventListener('click', async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                feedbackP.textContent = 'Você precisa estar logado para adicionar filmes a uma lista.';
-                feedbackP.className = 'list-feedback mt-2 text-red-500';
-                feedbackP.classList.remove('hidden');
+    toggleWatchlist() {
+        if (!authManager.isAuthenticated()) {
+            authManager.showLoginModal();
                 return;
             }
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/listas`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Falha ao carregar suas listas.');
-                const lists = await response.json();
+        // Toggle watchlist (implement in backend later)
+        const watchlistBtns = document.querySelectorAll('#watchlistBtn, #heroWatchlistBtn');
+        watchlistBtns.forEach(btn => {
+            btn.classList.toggle('active');
+        });
 
-                if (lists.length === 0) {
-                    alert('Você não tem nenhuma lista. Crie uma primeiro na sua página de perfil.');
+        authManager.showNotification('Adicionado à lista para assistir depois', 'success');
+    }
+
+    showAddToListModal() {
+        if (!authManager.isAuthenticated()) {
+            authManager.showLoginModal();
                     return;
                 }
 
-                showListSelectionModal(lists);
-
-            } catch (error) {
-                console.error('Error fetching lists:', error);
-                feedbackP.textContent = 'Não foi possível carregar suas listas.';
-                feedbackP.className = 'list-feedback mt-2 text-red-500';
-                feedbackP.classList.remove('hidden');
-            }
-        });
+        authManager.showNotification('Funcionalidade em desenvolvimento', 'info');
     }
 
-    function showListSelectionModal(lists) {
-        // Remove existing modal if any
-        const existingModal = document.getElementById('listSelectionModal');
-        if (existingModal) existingModal.remove();
-
-        const modal = document.createElement('div');
-        modal.id = 'listSelectionModal';
-        modal.className = 'modal';
-        modal.style.display = 'block';
-
-        const modalContent = document.createElement('div');
-        modalContent.className = 'modal-content';
-
-        modalContent.innerHTML = `
-            <span class="close" id="closeListModal">&times;</span>
-            <h2>Selecione uma Lista</h2>
-            <select id="listSelector" class="input">
-                ${lists.map(list => `<option value="${list.id}">${list.nome}</option>`).join('')}
-            </select>
-            <button id="confirmAddToListBtn" class="btn btn-primary mt-4">Adicionar</button>
-        `;
-
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
-
-        document.getElementById('closeListModal').addEventListener('click', () => modal.remove());
-        document.getElementById('confirmAddToListBtn').addEventListener('click', async () => {
-            const selectedListId = document.getElementById('listSelector').value;
-            const token = localStorage.getItem('authToken');
-            const feedbackP = document.querySelector('.list-feedback');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/listas/${selectedListId}/series/${movieId}`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) throw new Error('Falha ao adicionar filme à lista.');
-
-                feedbackP.textContent = 'Filme adicionado com sucesso!';
-                feedbackP.className = 'list-feedback mt-2 text-green-500';
-                feedbackP.classList.remove('hidden');
-                modal.remove();
-
-            } catch(error) {
-                console.error('Error adding to list:', error);
-                alert('Ocorreu um erro ao adicionar o filme à lista.');
-            }
-        });
+    shareMovie() {
+        if (navigator.share && this.movie) {
+            navigator.share({
+                title: this.movie.title,
+                text: `Confira "${this.movie.title}" no ScreenMatch`,
+                url: window.location.href
+            });
+        } else {
+            // Fallback to copying URL
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                authManager.showNotification('Link copiado para a área de transferência', 'success');
+            }).catch(() => {
+                authManager.showNotification('Não foi possível copiar o link', 'error');
+            });
+        }
     }
 
-    loadMovieDetails();
+    async handleHeaderSearch(e) {
+        const query = e.target.value.trim();
+        const searchDropdown = document.getElementById('searchDropdown');
+        
+        if (!searchDropdown || query.length < 2) {
+            if (searchDropdown) searchDropdown.style.display = 'none';
+            return;
+        }
+
+        try {
+            const results = await apiService.searchMovies(query, 1);
+            this.showSearchSuggestions(results.movies.slice(0, 5), searchDropdown);
+            searchDropdown.style.display = 'block';
+        } catch (error) {
+            console.error('Error searching:', error);
+            searchDropdown.style.display = 'none';
+        }
+    }
+
+    showSearchSuggestions(movies, container) {
+        if (movies.length === 0) {
+            container.innerHTML = '<div class="search-suggestion no-results">Nenhum resultado encontrado</div>';
+            return;
+        }
+
+        container.innerHTML = movies.map(movie => `
+            <div class="search-suggestion" onclick="window.location.href='detalhes.html?id=${movie.id}'">
+                <img src="${movie.posterPath || 'placeholder.jpg'}" alt="${movie.title}">
+                <div class="suggestion-info">
+                    <h4>${movie.title}</h4>
+                    <p>${movie.year || 'N/A'}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    showError(message) {
+        const loadingState = document.getElementById('loadingState');
+        const detailsContent = document.getElementById('movieDetailsContent');
+        
+        if (loadingState) {
+            loadingState.innerHTML = `
+                <div class="container">
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Ops! Algo deu errado</h3>
+                        <p>${message}</p>
+                        <button class="btn-primary" onclick="window.location.href='index.html'">
+                            <i class="fas fa-home"></i>
+                            Voltar ao Início
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (detailsContent) {
+            detailsContent.classList.add('hidden');
+        }
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.movieDetailsPage = new MovieDetailsPage();
 });

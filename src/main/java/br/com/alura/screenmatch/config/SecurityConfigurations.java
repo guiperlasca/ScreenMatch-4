@@ -26,10 +26,22 @@ public class SecurityConfigurations {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/", "/index.html", "/css/**", "/js/**", "/img/**").permitAll();
+                    // Permitir acesso a recursos estáticos
+                    req.requestMatchers("/", "/index.html", "/detalhes.html", "/css/**", "/js/**", "/img/**", "/*.png", "/*.jpg", "/*.svg").permitAll();
+                    
+                    // Permitir acesso a endpoints públicos
+                    req.requestMatchers(HttpMethod.GET, "/series/**").permitAll();
+                    req.requestMatchers(HttpMethod.GET, "/busca/**").permitAll();
+                    req.requestMatchers(HttpMethod.GET, "/avaliacoes/series/**").permitAll();
+                    
+                    // Permitir login e cadastro
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
-                    req.requestMatchers(HttpMethod.POST, "/usuarios/cadastro").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
+                    
+                    // Permitir documentação da API
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
+                    
+                    // Todas as outras requisições precisam de autenticação
                     req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

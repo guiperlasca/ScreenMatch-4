@@ -36,4 +36,12 @@ public enum Categoria {
         }
         throw new IllegalArgumentException("Nenhuma categoria encontrada para a string fornecida: " + text);
     }
+
+    public String getCategoriaPortugues() {
+        return categoriaPortugues;
+    }
+
+    public String getCategoriaOmdb() {
+        return categoriaOmdb;
+    }
 }

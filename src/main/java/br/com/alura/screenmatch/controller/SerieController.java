@@ -64,6 +64,12 @@ public class SerieController {
         return servico.cadastrarSerie(dados);
     }
 
+    @GetMapping("/{id}/favorito")
+    public Boolean verificarFavorito(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        if (usuario == null) return false;
+        return servico.verificarFavorito(id, usuario);
+    }
+
     @PatchMapping("/{id}/favorito")
     public SerieDTO favoritarSerie(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario){
         return servico.favoritarSerie(id, usuario);
@@ -72,5 +78,15 @@ public class SerieController {
     @GetMapping("/buscar")
     public List<SerieDTO> buscarSeries(@RequestParam String titulo) {
         return servico.buscarSeries(titulo);
+    }
+
+    @GetMapping("/generos")
+    public List<String> obterGeneros() {
+        return servico.obterTodosGeneros();
+    }
+
+    @GetMapping("/anos")
+    public List<Integer> obterAnos() {
+        return servico.obterTodosAnos();
     }
 }

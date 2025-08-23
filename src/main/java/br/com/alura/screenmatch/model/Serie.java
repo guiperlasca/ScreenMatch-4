@@ -23,6 +23,8 @@ public class Serie {
     @Column(unique = true, nullable = false)
     private String titulo;
 
+    private Integer ano;
+
     private Integer totalTemporadas;
 
     private Integer anoDeLancamento;
@@ -50,6 +52,17 @@ public class Serie {
 
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
+        try {
+            String anoString = dadosSerie.ano();
+            if (anoString != null && !anoString.isEmpty()) {
+                // Extrai o primeiro ano se houver formato "2020-2021"
+                this.ano = Integer.valueOf(anoString.split("–")[0].split("-")[0]);
+            } else {
+                this.ano = null;
+            }
+        } catch (NumberFormatException e) {
+            this.ano = null;
+        }
         this.totalTemporadas = dadosSerie.totalTemporadas();
         try {
             this.avaliacao = Double.valueOf(dadosSerie.avaliacao());
@@ -61,7 +74,12 @@ public class Serie {
         this.poster = dadosSerie.poster();
         this.sinopse = ServicoDeTraducao.obterTraducao(dadosSerie.sinopse()).trim();
         try {
-            this.anoDeLancamento = Integer.valueOf(dadosSerie.ano().split("–")[0]);
+            String anoString = dadosSerie.ano();
+            if (anoString != null && !anoString.isEmpty()) {
+                this.anoDeLancamento = Integer.valueOf(anoString.split("–")[0]);
+            } else {
+                this.anoDeLancamento = null;
+            }
         } catch (NumberFormatException e) {
             this.anoDeLancamento = null;
         }
@@ -73,6 +91,14 @@ public class Serie {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getAno() {
+        return ano;
+    }
+
+    public void setAno(Integer ano) {
+        this.ano = ano;
     }
 
     public List<Episodio> getEpisodios() {
@@ -161,6 +187,7 @@ public class Serie {
         return
                 "genero=" + genero +
                         ", titulo='" + titulo + '\'' +
+                        ", ano=" + ano +
                         ", totalTemporadas=" + totalTemporadas +
                         ", avaliacao=" + avaliacao +
                         ", atores='" + atores + '\'' +

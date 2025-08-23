@@ -3,140 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineVault - Discover & Rate Movies</title>
+    <title>ScreenMatch - Descubra, Avalie e Organize seus Filmes</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-<div class="min-h-screen bg-background">
     <!-- Header -->
-    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <img src="img/placeholder-logo.svg" alt="CineVault Logo" class="h-8 w-8">
-                    <span class="text-2xl font-bold text-foreground">CineVault</span>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-film"></i>
+                    <span>ScreenMatch</span>
                 </div>
-
-                <nav class="hidden md:flex items-center space-x-6">
-                    <a href="#" class="text-foreground hover:text-primary transition-colors">Filmes</a>
-                    <a href="#" class="text-foreground hover:text-primary transition-colors">Listas</a>
-                    <a href="#" class="text-foreground hover:text-primary transition-colors">Avaliações</a>
-                    <button id="loginBtn" class="btn">Entrar</button>
-                    <button id="registerBtn" class="btn btn-primary">Cadastrar</button>
+                
+                <nav class="nav" id="mainNav">
+                    <a href="#" class="nav-link active">Início</a>
+                    <a href="#" class="nav-link">Filmes</a>
+                    <a href="#" class="nav-link">Listas</a>
+                    <a href="#" class="nav-link">Reviews</a>
                 </nav>
+                
+                <div class="header-actions">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="Buscar filmes..." class="search-input" id="headerSearch">
+                        <div class="search-dropdown" id="searchDropdown"></div>
+                    </div>
+                    
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="btn-secondary" id="loginBtn">Entrar</button>
+                        <button class="btn-primary" id="signupBtn">Cadastrar</button>
+                    </div>
+                    
+                    <div class="user-menu hidden" id="userMenu">
+                        <div class="user-avatar" id="userAvatar">
+                            <img src="placeholder-user.jpg" alt="Avatar">
+                        </div>
+                        <div class="user-dropdown">
+                            <a href="#" id="profileLink">Meu Perfil</a>
+                            <a href="#" id="myListsLink">Minhas Listas</a>
+                            <a href="#" id="favoritesLink">Favoritos</a>
+                            <hr>
+                            <a href="#" id="logoutBtn">Sair</a>
+                        </div>
+                    </div>
+                    
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section class="relative h-[70vh] flex items-center justify-center overflow-hidden">
-            <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('img/cinematic-movie-theater.png')"></div>
-            <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-                <h1 class="text-5xl md:text-7xl font-bold mb-6">Sua jornada <span class="block text-primary">cinematográfica</span> começa aqui</h1>
-                <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">Descubra, avalie e crie listas dos seus filmes favoritos. Conecte-se com outros cinéfilos e explore o mundo do cinema.</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button class="btn btn-primary btn-lg">Começar agora</button>
-                    <button class="btn btn-secondary btn-lg">Criar lista</button>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="hero-content">
+            <div class="container">
+                <div class="hero-text">
+                    <h1>Descubra seu próximo filme favorito</h1>
+                    <p>Avalie, organize e discuta sobre filmes e séries com uma comunidade apaixonada por cinema.</p>
+                    
+                    <div class="hero-search">
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Buscar por título, ator, diretor..." id="heroSearch">
+                            <button class="search-btn" id="heroSearchBtn">Buscar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <button class="btn-large btn-primary" id="getStartedBtn">Começar agora</button>
+                        <button class="btn-large btn-ghost" id="exploreBtn">Explorar filmes</button>
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <div class="featured-posters" id="featuredPosters">
+                        <!-- Posters serão carregados dinamicamente -->
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Search Section -->
-        <section class="py-16 bg-card">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Encontre seu próximo filme favorito</h2>
-                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Explore nossa vasta coleção de filmes com ferramentas de busca avançadas</p>
+    <!-- Search Results -->
+    <section class="search-results hidden" id="searchResults">
+        <div class="container">
+            <div class="section-header">
+                <h2>Resultados da Busca</h2>
+                <div class="results-info">
+                    <span id="resultsCount">0 resultados</span>
+                    <div class="view-options">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="max-w-4xl mx-auto">
-                    <div class="bg-background rounded-lg p-6 shadow-sm border border-border">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <input type="text" class="input" placeholder="Título do filme">
-                            <input type="text" class="input" placeholder="Diretor">
-                            <input type="text" class="input" placeholder="Ano">
+            </div>
+            
+            <div class="movies-grid" id="searchMoviesGrid">
+                <!-- Resultados serão carregados aqui -->
+            </div>
+            
+            <div class="load-more-container">
+                <button class="btn-secondary" id="loadMoreBtn">Carregar mais</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Movies -->
+    <section class="featured-section" id="featuredSection">
+        <div class="container">
+            <div class="section-header">
+                <h2>Filmes em Destaque</h2>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+            
+            <div class="movies-grid" id="featuredMovies">
+                <!-- Loading placeholder -->
+                <div class="loading-grid">
+                    <div class="movie-card-skeleton"></div>
+                    <div class="movie-card-skeleton"></div>
+                    <div class="movie-card-skeleton"></div>
+                    <div class="movie-card-skeleton"></div>
+                    <div class="movie-card-skeleton"></div>
+                    <div class="movie-card-skeleton"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Movies -->
+    <section class="popular-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Populares esta Semana</h2>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+            
+            <div class="movies-slider" id="popularMovies">
+                <!-- Slider de filmes populares -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Explorar por Gênero</h2>
+            </div>
+            
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="category-card" data-genre="action">
+                    <div class="category-image">
+                        <i class="fas fa-fist-raised"></i>
+                    </div>
+                    <h3>Ação</h3>
+                </div>
+                <div class="category-card" data-genre="comedy">
+                    <div class="category-image">
+                        <i class="fas fa-laugh"></i>
+                    </div>
+                    <h3>Comédia</h3>
+                </div>
+                <div class="category-card" data-genre="drama">
+                    <div class="category-image">
+                        <i class="fas fa-theater-masks"></i>
+                    </div>
+                    <h3>Drama</h3>
+                </div>
+                <div class="category-card" data-genre="horror">
+                    <div class="category-image">
+                        <i class="fas fa-ghost"></i>
+                    </div>
+                    <h3>Terror</h3>
+                </div>
+                <div class="category-card" data-genre="romance">
+                    <div class="category-image">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Romance</h3>
+                </div>
+                <div class="category-card" data-genre="scifi">
+                    <div class="category-image">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Ficção Científica</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <i class="fas fa-film"></i>
+                        <span>ScreenMatch</span>
+                    </div>
+                    <p>Sua plataforma definitiva para descobrir, avaliar e organizar filmes e séries.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Explorar</h4>
+                    <ul>
+                        <li><a href="#">Filmes Populares</a></li>
+                        <li><a href="#">Lançamentos</a></li>
+                        <li><a href="#">Top Rated</a></li>
+                        <li><a href="#">Gêneros</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Comunidade</h4>
+                    <ul>
+                        <li><a href="#">Listas Populares</a></li>
+                        <li><a href="#">Reviews Recentes</a></li>
+                        <li><a href="#">Discussões</a></li>
+                        <li><a href="#">Fórum</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Conta</h4>
+                    <ul>
+                        <li><a href="#">Meu Perfil</a></li>
+                        <li><a href="#">Minhas Listas</a></li>
+                        <li><a href="#">Configurações</a></li>
+                        <li><a href="#">Ajuda</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 ScreenMatch. Todos os direitos reservados. Produzido por Guilherme Perlasca.</p>
+                <div class="footer-links">
+                    <a href="#">Privacidade</a>
+                    <a href="#">Termos</a>
+                    <a href="#">Contato</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Entrar no ScreenMatch</h2>
+                <button class="modal-close" id="closeLoginModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember">
+                        <span>Lembrar de mim</span>
+                    </label>
+                    <a href="#" class="forgot-password">Esqueci a senha</a>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full">Entrar</button>
+            </form>
+            
+            <div class="auth-switch">
+                <p>Não tem uma conta? <a href="#" id="switchToSignup">Cadastre-se</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Criar Conta</h2>
+                <button class="modal-close" id="closeSignupModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="auth-form" id="signupForm">
+                <div class="form-group">
+                    <label for="signupName">Nome</label>
+                    <input type="text" id="signupName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupPassword">Senha</label>
+                    <input type="password" id="signupPassword" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupConfirmPassword">Confirmar Senha</label>
+                    <input type="password" id="signupConfirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="terms" required>
+                        <span>Aceito os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a></span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full">Criar Conta</button>
+            </form>
+            
+            <div class="auth-switch">
+                <p>Já tem uma conta? <a href="#" id="switchToLogin">Entre aqui</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Meu Perfil</h2>
+                <button class="modal-close" id="closeProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="profile-content">
+                <div class="profile-sidebar">
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar">
+                            <img src="placeholder-user.jpg" alt="Avatar" id="profileAvatar">
+                            <button class="avatar-upload-btn" id="avatarUploadBtn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" accept="image/*" style="display: none;" id="avatarInput">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <input type="text" class="input" placeholder="Gênero">
-                            <input type="text" class="input" placeholder="Ator/Atriz">
-                            <div class="flex gap-2">
-                                <button class="btn btn-secondary flex-1">Filtros</button>
-                                <button class="btn btn-primary flex-1">Buscar</button>
+                        <h3 id="profileName">Usuário</h3>
+                        <p id="profileEmail">usuario@email.com</p>
+                    </div>
+                    
+                    <nav class="profile-nav">
+                        <a href="#" class="profile-nav-item active" data-tab="info">Informações</a>
+                        <a href="#" class="profile-nav-item" data-tab="lists">Minhas Listas</a>
+                        <a href="#" class="profile-nav-item" data-tab="reviews">Minhas Reviews</a>
+                        <a href="#" class="profile-nav-item" data-tab="favorites">Favoritos</a>
+                        <a href="#" class="profile-nav-item" data-tab="settings">Configurações</a>
+                    </nav>
+                </div>
+                
+                <div class="profile-main">
+                    <div class="profile-tab active" id="tab-info">
+                        <h3>Informações Pessoais</h3>
+                        <form class="profile-form">
+                            <div class="form-group">
+                                <label for="editName">Nome</label>
+                                <input type="text" id="editName" name="name">
                             </div>
+                            <div class="form-group">
+                                <label for="editEmail">Email</label>
+                                <input type="email" id="editEmail" name="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="editBio">Bio</label>
+                                <textarea id="editBio" name="bio" rows="3" placeholder="Conte um pouco sobre você..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Salvar Alterações</button>
+                        </form>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-lists">
+                        <h3>Minhas Listas</h3>
+                        <div id="userLists">
+                            <!-- Listas do usuário serão carregadas aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-reviews">
+                        <h3>Minhas Reviews</h3>
+                        <div id="userReviews">
+                            <!-- Reviews do usuário serão carregadas aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-favorites">
+                        <h3>Meus Favoritos</h3>
+                        <div id="userFavorites">
+                            <!-- Favoritos do usuário serão carregados aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="profile-tab" id="tab-settings">
+                        <h3>Configurações</h3>
+                        <div class="settings-section">
+                            <h4>Privacidade</h4>
+                            <label class="toggle">
+                                <input type="checkbox" id="publicProfile">
+                                <span>Perfil público</span>
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" id="showActivity">
+                                <span>Mostrar atividade</span>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h4>Notificações</h4>
+                            <label class="toggle">
+                                <input type="checkbox" id="emailNotifications">
+                                <span>Notificações por email</span>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h4>Conta</h4>
+                            <button class="btn-secondary">Alterar Senha</button>
+                            <button class="btn-danger">Excluir Conta</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Featured Movies Section -->
-        <section class="py-16 bg-background">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-3xl md:text-4xl font-bold text-foreground">Filmes em Destaque</h2>
-                    <a href="#" class="text-primary hover:text-primary/80 font-medium">Ver todos →</a>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" id="featuredMovies">
-                    <!-- Movies will be loaded dynamically -->
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-muted border-t border-border">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="text-center">
-                <p class="text-muted-foreground">© 2024 CineVault. Todos os direitos reservados.</p>
-            </div>
         </div>
-    </footer>
-</div>
-
-<!-- Login Modal -->
-<div id="loginModal" class="modal hidden">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Login</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="loginEmail">Email/Login:</label>
-                <input type="text" id="loginEmail" name="login" required>
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Senha:</label>
-                <input type="password" id="loginPassword" name="senha" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Entrar</button>
-        </form>
-        <p>Não tem uma conta? <a href="#" id="showRegister">Cadastre-se</a></p>
     </div>
-</div>
 
-<!-- Register Modal -->
-<div id="registerModal" class="modal hidden">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Cadastro</h2>
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="registerEmail">Email/Login:</label>
-                <input type="text" id="registerEmail" name="login" required>
-            </div>
-            <div class="form-group">
-                <label for="registerPassword">Senha:</label>
-                <input type="password" id="registerPassword" name="senha" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
-        </form>
-        <p>Já tem uma conta? <a href="#" id="showLogin">Faça login</a></p>
-    </div>
-</div>
-
-<script src="js/config.js"></script>
-<script src="js/app.js"></script>
-<script src="js/auth.js"></script>
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

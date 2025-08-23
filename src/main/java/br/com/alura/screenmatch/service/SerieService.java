@@ -6,9 +6,7 @@ import br.com.alura.screenmatch.dto.SerieDTO;
 import br.com.alura.screenmatch.model.*;
 import br.com.alura.screenmatch.repository.SerieRepository;
 import br.com.alura.screenmatch.repository.UsuarioRepository;
-import br.com.alura.screenmatch.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,21 +38,27 @@ public class SerieService {
     }
 
     public List<SerieDTO> obterLancamentos() {
-        return converteDados(repository.findLatestReleases(PageRequest.of(0, 5)));
+        return converteDados(repository.findTop5ByEpisodioDataLancamento());
     }
 
     public SerieDTO obterPorId(Long id) {
-        Serie serie = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Série não encontrada com id: " + id));
-        return new SerieDTO(serie.getId(), serie.getTitulo(), serie.getTotalTemporadas(), serie.getAnoLancamento(), serie.getAvaliacao(), serie.getGenero(), serie.getAtores(), serie.getPoster(), serie.getSinopse(), null);
+        Optional<Serie> serie = repository.findById(id);
+        if (serie.isPresent()) {
+            Serie s = serie.get();
+            return new SerieDTO(s.getId(), s.getTitulo(), s.getAno(), s.getTotalTemporadas(), s.getAnoLancamento(), s.getAvaliacao(), s.getGenero(), s.getAtores(), s.getPoster(), s.getSinopse(), null);
+        }
+        return null; // Idealmente, lançar uma exceção Not Found
     }
 
     public List<EpisodioDTO> obterTodasTemporadas(Long id) {
-        Serie serie = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Série não encontrada com id: " + id));
-        return serie.getEpisodios().stream()
-                .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
-                .collect(Collectors.toList());
+        Optional<Serie> serie = repository.findById(id);
+        if (serie.isPresent()) {
+            Serie s = serie.get();
+            return s.getEpisodios().stream()
+                    .map(e -> new EpisodioDTO(e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo()))
+                    .collect(Collectors.toList());
+        }
+        return null; // Idealmente, lançar uma exceção
     }
 
     public List<EpisodioDTO> obterTemporadasPorNumero(Long id, Long numero) {
@@ -114,36 +118,44 @@ public class SerieService {
     }
 
     public List<SerieDTO> buscarSeries(String termo) {
-        List<Serie> seriesEncontradas = new ArrayList<>(repository.findByTermo(termo));
+        // Busca primeiro no banco de dados local
+        List<Serie> seriesLocais = repository.findByTermo(termo);
 
+        // Converte para DTO
+        List<SerieDTO> seriesDto = new ArrayList<>(converteDados(seriesLocais));
+
+        // Se não encontrar no banco local, busca na API do OMDB
+        if (seriesLocais.isEmpty()) {
+            String json = consumoApi.buscarSeries(termo);
+            if (json != null && !json.isEmpty()) {
+                DadosBuscaOMDB dadosBusca = conversor.obterDados(json, DadosBuscaOMDB.class);
+                if (dadosBusca != null && dadosBusca.series() != null) {
+                    List<SerieDTO> seriesApi = dadosBusca.series().stream()
+                            .map(d -> new SerieDTO(null, d.titulo(), d.poster(), d.imdbID(), Integer.valueOf(d.ano().split("–")[0])))
+                            .collect(Collectors.toList());
+                    seriesDto.addAll(seriesApi);
+                }
+            }
+        }
+
+        // Tenta buscar por categoria também
         try {
             Categoria categoria = Categoria.fromPortugues(termo.trim());
-            seriesEncontradas.addAll(repository.findByGenero(categoria));
+            List<Serie> seriesPorCategoria = repository.findByGenero(categoria);
+            seriesDto.addAll(converteDados(seriesPorCategoria));
         } catch (IllegalArgumentException e) {
             // O termo não é um gênero válido, ignora.
         }
 
-        List<SerieDTO> seriesDto = seriesEncontradas.stream()
-                .distinct()
-                .map(SerieDTO::new)
-                .collect(Collectors.toList());
+        return seriesDto.stream().distinct().collect(Collectors.toList());
+    }
 
-        if (seriesDto.isEmpty()) {
-            try {
-                String json = consumoApi.obterDados(termo);
-                DadosSerie dadosSerieApi = conversor.obterDados(json, DadosSerie.class);
-                if (dadosSerieApi != null && dadosSerieApi.titulo() != null) {
-                    Serie novaSerie = new Serie(dadosSerieApi);
-                    repository.save(novaSerie);
-                    seriesDto.add(new SerieDTO(novaSerie));
-                }
-            } catch (Exception e) {
-                // Log the exception or handle it as needed
-                System.err.println("Erro ao buscar série na API externa: " + e.getMessage());
-            }
+    public Boolean verificarFavorito(Long serieId, Usuario usuario) {
+        Serie serie = repository.findById(serieId).orElse(null);
+        if (serie == null || usuario == null) {
+            return false;
         }
-
-        return seriesDto;
+        return usuario.getFavoritas().contains(serie);
     }
 
     private List<SerieDTO> converteDados(List<Serie> series) {
@@ -153,22 +165,43 @@ public class SerieService {
     }
 
     public org.springframework.data.domain.Page<SerieDTO> buscarSeriesAvancada(br.com.alura.screenmatch.dto.BuscaAvancadaDTO dto, org.springframework.data.domain.Pageable pageable) {
-        // Placeholder implementation
-        return org.springframework.data.domain.Page.empty();
+        // Implementation for advanced search
+        List<Serie> series = repository.findAll();
+        List<SerieDTO> seriesDTO = converteDados(series);
+        
+        // Convert to page
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), seriesDTO.size());
+        List<SerieDTO> pageContent = seriesDTO.subList(start, end);
+        
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, seriesDTO.size());
     }
 
     public List<String> obterSugestoes(String query) {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
+        List<Serie> series = repository.findByTituloContainingIgnoreCase(query);
+        return series.stream()
+                .map(Serie::getTitulo)
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
     public List<String> obterTodosGeneros() {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
+        return List.of(
+            Categoria.ACAO.getCategoriaPortugues(),
+            Categoria.ROMANCE.getCategoriaPortugues(),
+            Categoria.COMEDIA.getCategoriaPortugues(),
+            Categoria.DRAMA.getCategoriaPortugues(),
+            Categoria.CRIME.getCategoriaPortugues()
+        );
     }
 
     public List<Integer> obterTodosAnos() {
-        // Placeholder implementation
-        return java.util.Collections.emptyList();
+        List<Serie> series = repository.findAll();
+        return series.stream()
+                .map(Serie::getAnoLancamento)
+                .filter(ano -> ano != null)
+                .distinct()
+                .sorted(Collections.reverseOrder())
+                .collect(Collectors.toList());
     }
 }
